@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DECK — 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Playfair+Display:ital,wght@1,900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #090909;
+            --ivory: #F2EDE4;
+            --red: #D63229;
+            --border: #1e1e1e;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            width: 100%; height: 100%;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--ivory);
+            font-family: 'IBM Plex Mono', monospace;
+            cursor: crosshair;
+        }
+
+        /* Grain overlay */
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: 1000;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+            opacity: 0.45;
+        }
+
+        /* ─── DECK ─── */
+        .deck { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+
+        .slide {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column; justify-content: center;
+            padding: 8vw;
+            opacity: 0;
+            transform: translateX(60px);
+            transition: opacity 0.55s cubic-bezier(0.16,1,0.3,1), transform 0.55s cubic-bezier(0.16,1,0.3,1);
+            pointer-events: none;
+        }
+        .slide.active   { opacity: 1; transform: translateX(0); pointer-events: all; }
+        .slide.exit     { opacity: 0; transform: translateX(-60px);
+                          transition: opacity 0.35s ease, transform 0.35s ease; }
+
+        /* Left red accent line */
+        .redline {
+            position: absolute; left: 0; top: 0;
+            width: 3px; height: 0;
+            background: var(--red);
+            transition: height 0.9s 0.25s cubic-bezier(0.16,1,0.3,1);
+        }
+        .slide.active .redline { height: 100%; }
+
+        /* Giant background number */
+        .bg-num {
+            position: absolute; right: -0.04em; bottom: -0.18em;
+            font-family: 'Bebas Neue', cursive;
+            font-size: clamp(180px, 34vw, 460px);
+            line-height: 1;
+            color: transparent;
+            -webkit-text-stroke: 1px var(--border);
+            user-select: none; pointer-events: none;
+        }
+
+        /* Stagger animations */
+        .slide.active .s1 { animation: up 0.6s 0.08s both cubic-bezier(0.16,1,0.3,1); }
+        .slide.active .s2 { animation: up 0.6s 0.18s both cubic-bezier(0.16,1,0.3,1); }
+        .slide.active .s3 { animation: up 0.6s 0.30s both cubic-bezier(0.16,1,0.3,1); }
+        .slide.active .s4 { animation: up 0.6s 0.44s both cubic-bezier(0.16,1,0.3,1); }
+        @keyframes up { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
+
+        /* ─── SLIDE 1 ─── */
+        .tag {
+            font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase;
+            color: var(--red); margin-bottom: 2.5rem;
+            display: flex; align-items: center; gap: 14px;
+        }
+        .tag::before { content:''; width:32px; height:1px; background:var(--red); }
+
+        .headline {
+            font-family: 'Bebas Neue', cursive;
+            font-size: clamp(62px, 11.5vw, 170px);
+            line-height: 0.88; letter-spacing: -0.01em;
+            color: var(--ivory); margin-bottom: 3rem;
+            max-width: 13ch;
+        }
+        .headline em {
+            font-style: italic;
+            font-family: 'Playfair Display', serif;
+            color: var(--red);
+        }
+
+        .subtitle {
+            font-size: clamp(12px, 1.1vw, 15px); line-height: 1.8;
+            color: #777; max-width: 44ch; font-weight: 300;
+            border-left: 2px solid var(--red); padding-left: 1.5rem;
+        }
+
+        /* ─── SLIDE 2 ─── */
+        .section-label {
+            font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;
+            color: #444; margin-bottom: 3.5rem;
+            display: flex; align-items: center; gap: 14px;
+        }
+        .section-label::after { content:''; width:48px; height:1px; background:var(--border); }
+
+        .section-title {
+            font-family: 'Bebas Neue', cursive;
+            font-size: clamp(38px, 5.5vw, 76px);
+            letter-spacing: 0.02em; margin-bottom: 3.5rem;
+        }
+
+        .features-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 1px; background: var(--border); max-width: 860px;
+        }
+
+        .card {
+            background: var(--bg); padding: 2.2rem 1.8rem;
+            position: relative; overflow: hidden;
+            transition: background 0.3s ease;
+        }
+        .card:hover { background: #0e0e0e; }
+        .card::after {
+            content:''; position:absolute; bottom:0; left:0;
+            width:0; height:2px; background:var(--red);
+            transition: width 0.4s ease;
+        }
+        .card:hover::after { width:100%; }
+
+        .card-num  { font-size: 10px; letter-spacing:.2em; color:var(--red); margin-bottom:1.2rem; }
+        .card-name { font-family:'Bebas Neue',cursive; font-size:26px; letter-spacing:.05em; margin-bottom:.9rem; }
+        .card-desc { font-size:12px; line-height:1.85; color:#555; font-weight:300; }
+
+        /* ─── SLIDE 3 ─── */
+        .closing-line {
+            font-size: 10px; letter-spacing:.3em; text-transform:uppercase;
+            color: #444; margin-bottom:2.8rem;
+        }
+
+        .big-cta {
+            font-family: 'Bebas Neue', cursive;
+            font-size: clamp(56px, 9.5vw, 132px);
+            line-height: 0.9; letter-spacing: -0.01em;
+            color: var(--ivory); margin-bottom: 3.5rem; max-width: 16ch;
+        }
+        .big-cta span { display:block; color:var(--red); }
+
+        .cta-btn {
+            display: inline-flex; align-items: center; gap: 16px;
+            background: var(--red); color: var(--ivory); border: none;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+            padding: 18px 36px; cursor: pointer;
+            position: relative; overflow: hidden;
+            transition: letter-spacing 0.25s ease;
+        }
+        .cta-btn::before {
+            content:''; position:absolute; inset:0;
+            background:rgba(255,255,255,0.1);
+            transform:translateX(-101%); transition:transform 0.3s ease;
+        }
+        .cta-btn:hover::before { transform:translateX(0); }
+        .cta-btn:hover { letter-spacing:.28em; }
+        .cta-btn svg { transition: transform 0.2s ease; }
+        .cta-btn:hover svg { transform:translateX(5px); }
+
+        .footnote { margin-top:3rem; font-size:10px; letter-spacing:.15em; color:#272727; }
+
+        /* ─── CHROME ─── */
+        .topbar {
+            position:fixed; top:3rem; left:4rem; z-index:100;
+            display:flex; align-items:center; gap:10px;
+        }
+        .brand      { font-family:'Bebas Neue',cursive; font-size:18px; letter-spacing:.2em; }
+        .brand-dot  { width:5px; height:5px; border-radius:50%; background:var(--red); }
+        .brand-sub  { font-size:10px; letter-spacing:.22em; color:#333; text-transform:uppercase; }
+
+        .counter {
+            position:fixed; top:3rem; right:4rem; z-index:100;
+            font-size:11px; letter-spacing:.15em; color:#2a2a2a;
+        }
+        .counter .cur { color:var(--ivory); }
+
+        .nav {
+            position:fixed; bottom:3rem; right:4rem; z-index:100;
+            display:flex; align-items:center; gap:.9rem;
+        }
+        .dots { display:flex; gap:6px; align-items:center; margin-right:.8rem; }
+        .dot  { width:20px; height:2px; background:var(--border); cursor:pointer; transition:all .3s ease; }
+        .dot.active { background:var(--red); width:36px; }
+
+        .nav-btn {
+            width:44px; height:44px; border:1px solid var(--border);
+            background:transparent; color:var(--ivory);
+            cursor:pointer; display:flex; align-items:center; justify-content:center;
+            transition:all .2s ease;
+        }
+        .nav-btn:hover { border-color:var(--ivory); background:rgba(255,255,255,0.04); }
+        .nav-btn:disabled { opacity:.18; cursor:not-allowed; }
+
+        .kbd-hint {
+            position:fixed; bottom:3rem; left:4rem; z-index:100;
+            font-size:10px; letter-spacing:.15em; color:#222;
+            display:flex; align-items:center; gap:8px;
+        }
+        .kbd { border:1px solid #242424; padding:2px 7px; font-family:'IBM Plex Mono',monospace; }
+
+        @media (max-width:768px) {
+            .slide { padding:2.5rem 1.8rem; }
+            .features-grid { grid-template-columns:1fr; }
+            .topbar,.counter { top:1.5rem; left:1.8rem; }
+            .counter { left:auto; right:1.8rem; }
+            .nav { bottom:1.5rem; right:1.8rem; }
+            .kbd-hint { display:none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="topbar">
+        <span class="brand">DECK</span>
+        <span class="brand-dot"></span>
+        <span class="brand-sub">2026 Edition</span>
+    </div>
+
+    <div class="counter"><span class="cur">01</span> / 03</div>
+
+    <div class="deck" id="deck">
+
+        <!-- ── SLIDE 1: TITLE ── -->
+        <div class="slide active" data-index="0">
+            <div class="redline"></div>
+            <div class="tag s1">Presentation · 2026</div>
+            <h1 class="headline s2">
+                Design That <em>Moves</em> People
+            </h1>
+            <p class="subtitle s3">
+                A curated exploration of intentional design decisions, visual craft,
+                and the spaces where form meets meaning.
+            </p>
+            <div class="bg-num">01</div>
+        </div>
+
+        <!-- ── SLIDE 2: FEATURES ── -->
+        <div class="slide" data-index="1">
+            <div class="redline"></div>
+            <div class="section-label s1">Core Principles</div>
+            <h2 class="section-title s2">What We Believe</h2>
+            <div class="features-grid s3">
+                <div class="card">
+                    <div class="card-num">— 01</div>
+                    <div class="card-name">Intention</div>
+                    <p class="card-desc">Every pixel placed with purpose. No element exists without earning its place in the composition.</p>
+                </div>
+                <div class="card">
+                    <div class="card-num">— 02</div>
+                    <div class="card-name">Restraint</div>
+                    <p class="card-desc">The power of negative space. Knowing when to stop is the hardest and most important skill.</p>
+                </div>
+                <div class="card">
+                    <div class="card-num">— 03</div>
+                    <div class="card-name">Resonance</div>
+                    <p class="card-desc">Design that outlasts trends. Work made to be remembered long after the first impression fades.</p>
+                </div>
+            </div>
+            <div class="bg-num">02</div>
+        </div>
+
+        <!-- ── SLIDE 3: CTA ── -->
+        <div class="slide" data-index="2">
+            <div class="redline"></div>
+            <div class="closing-line s1">Ready to Begin</div>
+            <div class="big-cta s2">
+                Let's Build <span>Something</span> Real
+            </div>
+            <button class="cta-btn s3">
+                Start the Conversation
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M3 8H13M9 4L13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <div class="footnote s4">© 2026 — All Rights Reserved</div>
+            <div class="bg-num">03</div>
+        </div>
+
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="dots">
+            <div class="dot active" data-goto="0"></div>
+            <div class="dot" data-goto="1"></div>
+            <div class="dot" data-goto="2"></div>
+        </div>
+        <button class="nav-btn" id="prev" disabled>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <button class="nav-btn" id="next">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M5 2L10 7L5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+    </nav>
+
+    <div class="kbd-hint">
+        <span class="kbd">←</span>
+        <span class="kbd">→</span>
+        <span style="margin-left:4px;">Navigate</span>
+    </div>
+
+    <script>
+        const slides  = document.querySelectorAll('.slide');
+        const dots    = document.querySelectorAll('.dot');
+        const prevBtn = document.getElementById('prev');
+        const nextBtn = document.getElementById('next');
+        const cur     = document.querySelector('.counter .cur');
+        let current   = 0;
+
+        function goTo(index) {
+            if (index < 0 || index >= slides.length) return;
+
+            const old = current;
+            slides[old].classList.remove('active');
+            slides[old].classList.add('exit');
+            setTimeout(() => slides[old].classList.remove('exit'), 450);
+
+            current = index;
+            slides[current].classList.add('active');
+
+            dots.forEach((d, i) => d.classList.toggle('active', i === current));
+            cur.textContent = String(current + 1).padStart(2, '0');
+            prevBtn.disabled = current === 0;
+            nextBtn.disabled = current === slides.length - 1;
+        }
+
+        prevBtn.addEventListener('click', () => goTo(current - 1));
+        nextBtn.addEventListener('click', () => goTo(current + 1));
+        dots.forEach((d, i) => d.addEventListener('click', () => goTo(i)));
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
+            if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1);
+        });
+    </script>
+</body>
+</html>

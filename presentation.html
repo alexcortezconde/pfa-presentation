@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal Finance Automation — Alexander Cortez Conde</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Playfair+Display:ital,wght@1,900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #090909;
+  --surface: #0f0f0f;
+  --border:  #1e1e1e;
+  --ivory:   #F2EDE4;
+  --iv60:    rgba(242,237,228,0.6);
+  --iv20:    rgba(242,237,228,0.08);
+  --red:     #D63229;
+  --rdim:    rgba(214,50,41,0.12);
+  --orange:  #E87C2A;
+  --teal:    #2ABBA8;
+  --purple:  #9B6EF3;
+  --blue:    #4E9FE8;
+  --green:   #3DBA6E;
+  --yellow:  #D4B84A;
+  --fd: 'Bebas Neue', cursive;
+  --fb: 'IBM Plex Mono', monospace;
+  --fa: 'Playfair Display', serif;
+  --total: 19;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--ivory);font-family:var(--fb)}
+body::before{content:'';position:fixed;inset:0;z-index:9000;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  opacity:.4}
+
+/* ── PROGRESS ── */
+.progress{position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:500}
+.pfill{height:100%;background:var(--red);transition:width .5s cubic-bezier(.16,1,.3,1)}
+
+/* ── CHROME ── */
+.topbar{position:fixed;top:2rem;left:3.5rem;z-index:200;display:flex;align-items:center;gap:10px}
+.bname{font-family:var(--fd);font-size:17px;letter-spacing:.2em;cursor:pointer}
+.bdot{width:5px;height:5px;border-radius:50%;background:var(--red)}
+.bsub{font-size:9px;letter-spacing:.25em;color:#333;text-transform:uppercase}
+.counter{position:fixed;top:2rem;right:3.5rem;z-index:200;font-size:11px;letter-spacing:.15em;color:#2a2a2a}
+.counter .cur{color:var(--ivory)}
+
+/* ── DECK / SLIDE ── */
+.deck{position:relative;width:100vw;height:100vh;overflow:hidden}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;
+  padding:5.5rem 7vw 4.5rem;opacity:0;transform:translateX(60px);pointer-events:none;
+  transition:opacity .55s cubic-bezier(.16,1,.3,1),transform .55s cubic-bezier(.16,1,.3,1)}
+.slide.active{opacity:1;transform:translateX(0);pointer-events:all}
+.slide.exit{opacity:0;transform:translateX(-60px);transition:opacity .35s ease,transform .35s ease}
+
+.redline{position:absolute;left:0;top:0;width:3px;height:0;background:var(--red);
+  transition:height .9s .2s cubic-bezier(.16,1,.3,1)}
+.slide.active .redline{height:100%}
+
+.bgnum{position:absolute;right:-.04em;bottom:-.18em;font-family:var(--fd);
+  font-size:clamp(160px,30vw,400px);line-height:1;color:transparent;
+  -webkit-text-stroke:1px var(--border);user-select:none;pointer-events:none}
+
+/* stagger */
+.slide.active .s1{animation:up .6s .07s both cubic-bezier(.16,1,.3,1)}
+.slide.active .s2{animation:up .6s .17s both cubic-bezier(.16,1,.3,1)}
+.slide.active .s3{animation:up .6s .29s both cubic-bezier(.16,1,.3,1)}
+.slide.active .s4{animation:up .6s .43s both cubic-bezier(.16,1,.3,1)}
+.slide.active .s5{animation:up .6s .57s both cubic-bezier(.16,1,.3,1)}
+@keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.tag{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--red);
+  margin-bottom:1.6rem;display:flex;align-items:center;gap:14px}
+.tag::before{content:'';width:28px;height:1px;background:var(--red)}
+
+.stitle{font-family:var(--fd);font-size:clamp(38px,5vw,68px);
+  letter-spacing:.02em;line-height:1;margin-bottom:2.2rem}
+
+/* ── NAV ── */
+.nav{position:fixed;bottom:2.5rem;right:3.5rem;z-index:200;display:flex;align-items:center;gap:.8rem}
+.dots{display:flex;gap:5px;align-items:center;margin-right:.6rem}
+.dot{width:18px;height:2px;background:var(--border);cursor:pointer;transition:all .3s ease}
+.dot.active{background:var(--red);width:32px}
+.nbtn{width:40px;height:40px;border:1px solid var(--border);background:transparent;color:var(--ivory);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s ease}
+.nbtn:hover{border-color:var(--ivory);background:var(--iv20)}
+.nbtn:disabled{opacity:.18;cursor:not-allowed}
+.kbdh{position:fixed;bottom:2.5rem;left:3.5rem;z-index:200;font-size:9px;
+  letter-spacing:.15em;color:#1e1e1e;display:flex;align-items:center;gap:6px}
+.kbd{border:1px solid #1e1e1e;padding:2px 6px}
+
+/* ═══════════════════════════════
+   SLIDE 1 — TITLE
+═══════════════════════════════ */
+.s1bg{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 80% 60% at 72% 50%,rgba(214,50,41,.06) 0%,transparent 70%),
+             radial-gradient(ellipse 50% 70% at 18% 35%,rgba(78,159,232,.04) 0%,transparent 70%);
+  animation:glow 7s ease infinite alternate}
+@keyframes glow{from{opacity:.5}to{opacity:1}}
+
+.tmain{font-family:var(--fd);font-size:clamp(64px,10vw,144px);
+  line-height:.88;letter-spacing:-.01em;margin-bottom:1.8rem}
+.tmain em{font-family:var(--fa);font-style:italic;font-weight:900;color:var(--red)}
+.tsub{font-size:clamp(13px,1.3vw,17px);color:#666;font-weight:300;
+  letter-spacing:.04em;margin-bottom:2.8rem}
+.tmeta{display:flex;align-items:center;gap:2rem;font-size:11px;letter-spacing:.14em;color:#333}
+.tmeta .sep{width:1px;height:13px;background:var(--border)}
+.ubadge{position:absolute;bottom:3.2rem;right:7vw;font-size:9px;
+  letter-spacing:.2em;text-transform:uppercase;color:#252525;
+  display:flex;align-items:center;gap:8px}
+.ubadge::before{content:'';width:18px;height:1px;background:#222}
+
+/* ═══════════════════════════════
+   SLIDE 2 — THE PROBLEM
+═══════════════════════════════ */
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:4vw;align-items:center}
+.plist{list-style:none;display:flex;flex-direction:column;gap:1.1rem}
+.plist li{display:flex;align-items:flex-start;gap:.9rem;font-size:clamp(14px,1.4vw,18px);
+  line-height:1.75;color:#666;font-weight:300}
+.plist .ic{font-size:15px;flex-shrink:0;margin-top:2px}
+.plist strong{color:var(--ivory)}
+.inbox{background:var(--surface);border:1px solid var(--border);
+  border-radius:4px;overflow:hidden;box-shadow:0 0 40px rgba(0,0,0,.5)}
+.ihead{background:#0d0d0d;border-bottom:1px solid var(--border);
+  padding:.65rem 1.1rem;font-size:9px;letter-spacing:.2em;text-transform:uppercase;
+  color:#333;display:flex;align-items:center;justify-content:space-between}
+.ibadge{background:var(--red);color:white;font-size:9px;padding:2px 7px;border-radius:2px}
+.erow{display:grid;grid-template-columns:1.6rem 1fr auto;align-items:center;
+  gap:.7rem;padding:.55rem 1.1rem;border-bottom:1px solid var(--border);
+  font-size:10px;transition:background .2s ease;cursor:default}
+.erow:hover{background:#111}
+.erow .ea{color:var(--red);flex-shrink:0;letter-spacing:.04em}
+.erow.ur{background:rgba(214,50,41,.03)}
+.erow.ur span:nth-child(2){color:var(--iv60)}
+
+/* ═══════════════════════════════
+   SLIDE 3 — GAS STATION
+═══════════════════════════════ */
+.vslayout{display:grid;grid-template-columns:1fr 70px 1fr;gap:2vw;align-items:center}
+.vscenter{font-family:var(--fd);font-size:48px;letter-spacing:.05em;
+  color:#242424;text-align:center}
+.gcard{background:var(--surface);border:1px solid var(--border);
+  padding:2rem 1.8rem;position:relative;overflow:hidden}
+.gcard::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:3px}
+.gcard.fuel::after{background:var(--orange)}
+.gcard.home::after{background:var(--teal)}
+.gtxn{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#333;margin-bottom:.9rem}
+.gamt{font-family:var(--fd);font-size:30px;letter-spacing:.04em;margin-bottom:.3rem}
+.gmerch{font-size:12px;color:#555;font-weight:300;margin-bottom:1.6rem}
+.gcrow{display:flex;align-items:center;gap:.9rem;margin-bottom:.6rem}
+.gcico{font-size:28px}
+.gcname{font-size:16px;letter-spacing:.04em}
+.gcname .sub{font-size:12px;color:#444;margin-top:2px}
+.cbar{height:3px;background:var(--border);margin-top:.7rem}
+.cfill{height:100%;width:0;transition:width 1s .5s ease}
+.cfill.fuel{background:var(--orange)}
+.cfill.home{background:var(--teal)}
+.clabel{font-size:9px;color:#444;margin-top:.4rem;letter-spacing:.08em}
+.gfooter{margin-top:2.5rem;font-size:11px;color:#3a3a3a;
+  border-left:2px solid var(--border);padding-left:1.2rem;
+  line-height:1.75;font-weight:300;font-style:italic;max-width:72ch}
+.gfooter strong{color:var(--iv60);font-style:normal}
+
+/* ═══════════════════════════════
+   SLIDE 4 — VERTICAL FLOWCHART
+═══════════════════════════════ */
+.arch-v2{display:flex;flex-direction:column;gap:.5rem;width:100%;flex:1;min-height:0}
+.arch-lanes{display:grid;grid-template-columns:1fr 1fr;gap:1rem;flex:1;min-height:0;align-items:start}
+.fc-lane{display:grid;grid-template-columns:minmax(0,1fr) 118px minmax(0,1fr);
+  align-items:center;border:1px solid;padding:.8rem 1rem 1rem;position:relative}
+.fc-lane.l1{border-color:rgba(232,124,42,.25);background:rgba(232,124,42,.03)}
+.fc-lane.l2{border-color:rgba(42,187,168,.25);background:rgba(42,187,168,.03)}
+.fc-llabl{grid-column:1/4;font-size:8px;letter-spacing:.22em;text-transform:uppercase;
+  padding-bottom:.3rem;margin-bottom:.2rem;border-bottom:1px solid var(--border)}
+.l1 .fc-llabl{color:var(--orange)}
+.l2 .fc-llabl{color:var(--teal)}
+.fc-node{grid-column:2;display:flex;align-items:center;justify-content:center;gap:3px;
+  padding:.4rem .5rem;border:1px solid;font-size:8.5px;letter-spacing:.05em;
+  text-transform:uppercase;text-align:center;white-space:nowrap;overflow:hidden}
+.fc-img{width:13px;height:13px;object-fit:contain;filter:brightness(1.2);flex-shrink:0}
+.fc-dt{border-color:rgba(61,186,110,.5);background:rgba(61,186,110,.08);color:#86d4a4}
+.fc-ag{border-color:rgba(155,110,243,.5);background:rgba(155,110,243,.08);color:#c4abff}
+.fc-rb{border-color:rgba(78,159,232,.5);background:rgba(78,159,232,.08);color:#95c8f5}
+.fc-hu{border-color:rgba(232,124,42,.5);background:rgba(232,124,42,.08);color:#f5be8c}
+.fc-or{border-color:rgba(212,184,74,.5);background:rgba(212,184,74,.08);color:#e8d080}
+.fc-end{border-color:rgba(61,186,110,.3);background:rgba(61,186,110,.05);color:#86d4a4}
+.fc-varr{grid-column:2;text-align:center;font-size:11px;color:#2a2a2a;
+  line-height:1;padding:5px 0;user-select:none}
+.fc-plus{grid-column:2;text-align:center;font-size:9px;color:#2e2e2e;
+  line-height:1.2;user-select:none}
+.fc-diam-o{grid-column:2;justify-self:center;width:116px;height:44px;
+  clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);
+  background:rgba(212,184,74,.55);display:flex;align-items:center;
+  justify-content:center;margin:1px 0}
+.fc-diam-i{width:110px;height:38px;
+  clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);
+  background:rgba(212,184,74,.10);display:flex;align-items:center;
+  justify-content:center;font-size:8px;font-style:italic;letter-spacing:.04em;
+  text-transform:uppercase;color:#e8d080;white-space:nowrap}
+.fc-br{display:flex;align-items:center;gap:3px;padding-left:3px}
+.fc-bconn{width:10px;height:1px;background:#2a2a2a;flex-shrink:0}
+.fc-blabel{font-size:8px;letter-spacing:.05em;color:#3a3a3a;white-space:nowrap;flex-shrink:0}
+.fc-harr{color:#2a2a2a;font-size:10px;flex-shrink:0}
+.fc-br .fc-node{grid-column:unset;font-size:8px;padding:.15rem .28rem}
+.abot{border-top:1px solid var(--border);padding-top:.5rem;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;gap:2rem}
+.astore{display:flex;align-items:center;gap:.5rem;font-size:9px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--green)}
+.astore .asi{font-size:15px}
+.aarr{color:var(--border);font-size:16px}
+.legend{position:absolute;top:2.2rem;right:7vw;
+  display:flex;gap:.9rem;align-items:center;font-size:8px;
+  letter-spacing:.1em;text-transform:uppercase;color:#2a2a2a}
+.li2{display:flex;align-items:center;gap:4px}
+.ldot{width:6px;height:6px;border-radius:50%}
+
+/* ═══════════════════════════════
+   SLIDE 5 — COMPONENTS
+═══════════════════════════════ */
+.cgrid{display:grid;grid-template-columns:repeat(4,1fr);
+  gap:1px;background:var(--border);width:100%}
+.ccard{background:var(--bg);padding:1.2rem 1.1rem;
+  display:flex;flex-direction:column;gap:.45rem;
+  cursor:default;transition:background .25s ease;position:relative;overflow:hidden}
+.ccard::after{content:'';position:absolute;bottom:0;left:0;
+  width:0;height:2px;background:var(--red);transition:width .35s ease}
+.ccard:hover{background:var(--surface)}
+.ccard:hover::after{width:100%}
+.ccico{font-size:19px}
+.ccname{font-family:var(--fd);font-size:20px;letter-spacing:.05em;line-height:1}
+.ccdesc{font-size:10px;color:#3a3a3a;line-height:1.65;font-weight:300}
+
+/* ═══════════════════════════════
+   SLIDE 6 — PROMPT ENGINEERING
+═══════════════════════════════ */
+.tlwrap{width:100%;display:flex;flex-direction:column;gap:0}
+.tltrack{display:flex;align-items:flex-start;gap:0;width:100%;position:relative}
+.tltrack::before{content:'';position:absolute;top:17px;left:18px;right:18px;
+  height:1px;background:var(--border)}
+.tlnode{flex:1;display:flex;flex-direction:column;align-items:center;
+  gap:.6rem;position:relative;padding:0 .4rem}
+.tlcircle{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);
+  background:var(--bg);display:flex;align-items:center;justify-content:center;
+  font-family:var(--fd);font-size:15px;z-index:1;flex-shrink:0;
+  transition:border-color .3s ease}
+.tlnode.done .tlcircle{border-color:var(--green);color:var(--green)}
+.tlnode.fail .tlcircle{border-color:var(--red);color:var(--red)}
+.tlcont{text-align:center}
+.tliter{font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:#333;margin-bottom:.25rem}
+.tlchange{font-size:15px;color:var(--iv60);line-height:1.5;margin-bottom:.3rem;font-weight:300}
+.tlres{font-size:11px;padding:3px 7px;border:1px solid;
+  display:inline-flex;align-items:center;gap:3px;line-height:1.4}
+.tlnode.fail .tlres{border-color:rgba(214,50,41,.3);color:var(--red);background:var(--rdim)}
+.tlnode.done .tlres{border-color:rgba(61,186,110,.3);color:var(--green);background:rgba(61,186,110,.08)}
+.accwrap{margin-top:2.2rem}
+.acchead{display:flex;justify-content:space-between;align-items:baseline;
+  margin-bottom:.5rem;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:#2a2a2a}
+.accscore{font-family:var(--fd);font-size:80px;letter-spacing:.04em;color:var(--green)}
+.accbg{height:4px;background:var(--border);position:relative}
+.accfill{height:100%;width:0;
+  background:linear-gradient(90deg,var(--red) 0%,var(--orange) 50%,var(--green) 100%);
+  transition:width 1.2s 1s cubic-bezier(.16,1,.3,1)}
+.accms{display:flex;justify-content:space-between;
+  margin-top:.35rem;font-size:7.5px;color:#222;letter-spacing:.07em}
+
+/* ── shrink dots for 12 slides ── */
+.dot{width:12px}.dot.active{width:22px}
+
+/* ═══════════════════════════════
+   SLIDE 7 — 5 TECHNIQUES
+═══════════════════════════════ */
+.tcards{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);margin-bottom:1.4rem}
+.tcard{background:var(--bg);padding:1.2rem .9rem;display:flex;flex-direction:column;gap:.4rem;
+  position:relative;overflow:hidden;transition:background .2s ease}
+.tcard:hover{background:var(--surface)}
+.tcard::after{content:'';position:absolute;top:0;left:0;height:2px;width:0;
+  background:var(--red);transition:width .35s ease}
+.tcard:hover::after{width:100%}
+.tcnum{font-size:8px;letter-spacing:.2em;color:var(--red)}
+.tcico{font-size:17px}
+.tcname{font-family:var(--fd);font-size:24px;letter-spacing:.05em;line-height:1}
+.tcdesc{font-size:15px;color:#3a3a3a;line-height:1.7;font-weight:300}
+.code-label{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:#2a2a2a;margin-bottom:.5rem}
+.codeblock{background:#050505;border:1px solid var(--border);padding:1rem 1.3rem;
+  font-family:var(--fb);font-size:11px;line-height:1.85;color:#555;overflow:auto}
+.codeblock .cm{color:#252525}
+.codeblock .kw{color:var(--red)}
+.codeblock .str{color:var(--teal)}
+.codeblock .hl{color:var(--iv60)}
+
+/* ═══════════════════════════════
+   SLIDE 8 — EVALUATION
+═══════════════════════════════ */
+.evallayout{display:grid;grid-template-columns:1fr 1fr;gap:4vw;align-items:start}
+.stat-trio{display:flex;flex-direction:column;gap:.7rem;margin-bottom:1.4rem}
+.statcard{background:var(--surface);border:1px solid var(--border);
+  padding:.8rem 1.3rem;display:flex;align-items:baseline;gap:1rem}
+.statnum{font-family:var(--fd);font-size:40px;letter-spacing:.02em}
+.statnum.green{color:var(--green)}
+.statlbl{font-size:15px;letter-spacing:.15em;text-transform:uppercase;color:#333;line-height:1.6}
+.scorebars{display:flex;flex-direction:column;gap:.55rem}
+.sbar-row{display:grid;grid-template-columns:28px 1fr 46px;gap:.7rem;align-items:center}
+.sbar-lbl{font-size:8px;color:#333;letter-spacing:.1em}
+.sbar-bg{height:4px;background:var(--border)}
+.sbar-fill{height:100%;width:0;transition:width 1s .4s ease}
+.sbar-val{font-size:9px;color:var(--iv60);text-align:right}
+.evtable{width:100%;border-collapse:collapse}
+.evtable th{font-size:15px;letter-spacing:.2em;text-transform:uppercase;color:#333;
+  padding:.55rem .8rem;border-bottom:1px solid var(--border);font-weight:400;text-align:left}
+.evtable td{font-size:18px;color:#555;padding:.5rem .8rem;
+  border-bottom:1px solid var(--border);line-height:1.4}
+.evtable td:first-child{color:var(--iv60)}
+.evtable td:last-child{text-align:center;font-size:13px}
+.evtable tr:last-child td{border-bottom:none}
+
+/* ═══════════════════════════════
+   SLIDE 9 — RAG / CONTEXT GROUNDING
+═══════════════════════════════ */
+.raglayout{display:grid;grid-template-columns:1fr 1fr;gap:4vw;align-items:start}
+.ragflow{display:flex;flex-direction:column;align-items:flex-start}
+.ragnode{background:var(--surface);border:1px solid var(--border);
+  padding:.8rem 1.1rem;display:flex;align-items:center;gap:.8rem;min-width:260px}
+.ragnode .rni{font-size:15px;flex-shrink:0}
+.ragnode .rnt{font-size:15px;letter-spacing:.05em}
+.ragnode .rns{font-size:12px;color:#444;font-weight:300;margin-top:2px}
+.ragconn{width:2px;height:22px;background:var(--border);margin-left:20px;
+  position:relative;flex-shrink:0}
+.ragconn::after{content:'▼';position:absolute;bottom:-7px;left:-3px;
+  font-size:7px;color:#2a2a2a}
+.ragquote{background:var(--rdim);border:1px solid rgba(214,50,41,.2);
+  border-left:3px solid var(--red);padding:1.3rem 1.5rem;margin-bottom:1.4rem}
+.ragquote .qt{font-family:var(--fa);font-style:italic;font-weight:900;
+  font-size:clamp(15px,1.8vw,21px);color:var(--ivory);line-height:1.3;margin-bottom:.6rem}
+.ragquote .qsub{font-size:12px;color:#444;letter-spacing:.1em}
+.ragbullet{font-size:15px;color:#444;line-height:1.85;font-weight:300;
+  border-left:2px solid var(--border);padding-left:1.2rem;max-width:44ch}
+
+/* ═══════════════════════════════
+   SLIDE 10 — MAESTRO BPMN
+═══════════════════════════════ */
+.bpmn-outer{flex:1;display:flex;flex-direction:column;min-height:0}
+.bpmn-placeholder{background:var(--surface);border:1px solid var(--border);
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:.8rem;position:relative;min-height:0}
+.bpmn-todo{font-family:var(--fd);font-size:24px;letter-spacing:.1em;color:#1c1c1c}
+.bpmn-sub{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#181818}
+.bpmn-labels{position:absolute;inset:0;pointer-events:none}
+.bpmn-label{position:absolute;font-size:8px;letter-spacing:.12em;text-transform:uppercase;
+  color:#282828;display:flex;align-items:center;gap:5px}
+.bpmn-label::before{content:'';width:16px;height:1px;background:#222;flex-shrink:0}
+.bpmn-label.ltr{flex-direction:row-reverse}
+.bpmn-label.ltr::before{width:16px}
+
+/* ═══════════════════════════════
+   SLIDE 11 — DEMO TRANSITION
+═══════════════════════════════ */
+.demoglow{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 55% 45% at 50% 50%,rgba(214,50,41,.06) 0%,transparent 70%);
+  animation:glow2 4s ease infinite alternate}
+@keyframes glow2{from{opacity:.4}to{opacity:1}}
+.demomain{font-family:var(--fd);font-size:clamp(58px,8.5vw,126px);
+  line-height:.92;letter-spacing:-.01em;text-align:center}
+.slide.active .demomain{animation:pulse 3.5s ease-in-out infinite}
+.demomain em{font-family:var(--fa);font-style:italic;font-weight:900;color:var(--red)}
+@keyframes pulse{0%,100%{opacity:.8;transform:scale(1)}50%{opacity:1;transform:scale(1.01)}}
+
+/* ═══════════════════════════════
+   SLIDE 12 — DEMO FLOW 1
+═══════════════════════════════ */
+.democases{display:flex;flex-direction:column;gap:.75rem;width:100%}
+.democase{display:flex;align-items:center;gap:0;border:1px solid var(--border);
+  padding:.65rem 1rem;position:relative}
+.democase.green{border-color:rgba(61,186,110,.25);background:rgba(61,186,110,.03)}
+.democase.yellow{border-color:rgba(212,184,74,.25);background:rgba(212,184,74,.03)}
+.democase.dred{border-color:rgba(214,50,41,.25);background:var(--rdim)}
+.dclabel{position:absolute;top:-.5rem;left:1rem;font-size:7.5px;letter-spacing:.2em;
+  text-transform:uppercase;padding:0 5px;background:var(--bg)}
+.democase.green .dclabel{color:var(--green)}
+.democase.yellow .dclabel{color:var(--yellow)}
+.democase.dred .dclabel{color:var(--red)}
+.dcnodes{display:flex;align-items:center;gap:0;flex:1}
+.dcn{display:flex;align-items:center;gap:.35rem;padding:.32rem .6rem;
+  border:1px solid;border-radius:3px;font-size:8px;flex-shrink:0;white-space:nowrap}
+.dcn.inp{border-color:rgba(61,186,110,.3);color:#86d4a4}
+.dcn.proc{border-color:rgba(155,110,243,.3);color:#c4abff}
+.dcn.proc.rb{border-color:rgba(78,159,232,.3);color:#95c8f5}
+.dcn.orch{border-color:rgba(212,184,74,.3);color:#e8d080}
+.dcn.act{border-color:rgba(232,124,42,.3);color:#f5be8c}
+.dcn.out{border-color:rgba(61,186,110,.3);color:#86d4a4}
+.dcn.out.warn{border-color:rgba(212,184,74,.3);color:#e8d080}
+.dcn.out.danger{border-color:rgba(214,50,41,.3);color:var(--red)}
+.dca{color:#2a2a2a;font-size:11px;padding:0 4px;flex-shrink:0}
+
+/* ═══════════════════════════════
+   SLIDE 13 — FLOW 2 OVERVIEW
+═══════════════════════════════ */
+.flow2wrap{display:grid;grid-template-columns:1fr 1fr;gap:4vw;align-items:start}
+.flow2steps{display:flex;flex-direction:column}
+.f2step{display:flex;align-items:flex-start;gap:1rem;
+  background:var(--surface);border:1px solid var(--border);padding:.75rem 1.1rem}
+.f2step .fsi{font-size:16px;flex-shrink:0;margin-top:1px;width:22px;text-align:center}
+.f2step .fsn{font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--red);margin-bottom:2px}
+.f2step .fst{font-size:10px;color:#555;font-weight:300;line-height:1.55}
+.f2conn{width:2px;height:14px;background:var(--border);margin-left:18px;
+  flex-shrink:0;position:relative}
+.f2conn::after{content:'▼';position:absolute;bottom:-6px;left:-3px;font-size:7px;color:#242424}
+.f2panel{display:flex;flex-direction:column;gap:1px;background:var(--border)}
+.f2pcard{background:var(--bg);padding:.85rem 1.1rem}
+.f2plbl{font-size:8px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:.3rem}
+.f2pdesc{font-size:11px;color:#555;font-weight:300;line-height:1.55}
+
+/* ═══════════════════════════════
+   SLIDE 14 — POWER BI DASHBOARD
+═══════════════════════════════ */
+.pbi-outer{flex:1;display:flex;flex-direction:column;min-height:0}
+.pbi-ph{background:var(--surface);border:1px solid var(--border);
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:.8rem;position:relative;min-height:0}
+.pbi-todo{font-family:var(--fd);font-size:22px;letter-spacing:.1em;color:#1c1c1c}
+.pbi-sub{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#181818}
+.pbi-labels{position:absolute;inset:0;pointer-events:none}
+.pbi-lbl{position:absolute;font-size:8px;letter-spacing:.12em;text-transform:uppercase;
+  color:#242424;display:flex;align-items:center;gap:5px}
+.pbi-lbl::before{content:'';width:16px;height:1px;background:#1e1e1e;flex-shrink:0}
+.pbi-lbl.r{flex-direction:row-reverse}
+
+/* ═══════════════════════════════
+   SLIDE 15 — CHALLENGES
+═══════════════════════════════ */
+.challenges{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;
+  background:var(--border);width:100%}
+.chcard{background:var(--bg);padding:1.2rem .9rem;display:flex;flex-direction:column;gap:.4rem;
+  position:relative;overflow:hidden;transition:background .2s ease}
+.chcard:hover{background:var(--surface)}
+.chcard::after{content:'';position:absolute;top:0;left:0;height:2px;width:0;
+  background:var(--red);transition:width .35s ease}
+.chcard:hover::after{width:100%}
+.chico{font-size:17px}
+.chnum{font-size:8px;letter-spacing:.2em;color:var(--red)}
+.chtitle{font-family:var(--fd);font-size:14px;letter-spacing:.05em;line-height:1}
+.chchal{font-size:15px;color:var(--iv60);line-height:1.65;font-weight:300;margin-top:.2rem}
+.chlessn{font-size:13px;color:#2e2e2e;line-height:1.7;margin-top:.4rem;
+  border-left:1px solid var(--border);padding-left:.6rem}
+
+/* ═══════════════════════════════
+   SLIDE 16 — ROADMAP
+═══════════════════════════════ */
+.roadmap-grid{display:grid;grid-template-columns:1fr 1fr;gap:2vw;align-items:start}
+.phase-card{background:var(--surface);border:1px solid var(--border);padding:1.7rem 1.8rem}
+.phase-lbl{font-size:9px;letter-spacing:.25em;text-transform:uppercase;
+  margin-bottom:1rem;display:flex;align-items:center;gap:10px}
+.phase-lbl.p2{color:var(--teal)}
+.phase-lbl.p2::before{content:'';width:20px;height:1px;background:var(--teal)}
+.phase-lbl.p3{color:var(--purple)}
+.phase-lbl.p3::before{content:'';width:20px;height:1px;background:var(--purple)}
+.phase-title{font-family:var(--fd);font-size:22px;letter-spacing:.05em;margin-bottom:1.1rem}
+.phase-items{list-style:none;display:flex;flex-direction:column;gap:.7rem}
+.phase-items li{font-size:16px;color:#555;line-height:1.6;font-weight:300;
+  display:flex;align-items:flex-start;gap:.8rem}
+.phase-items .pic{font-size:14px;flex-shrink:0;margin-top:1px}
+
+/* ═══════════════════════════════
+   SLIDE 17 — KEY TAKEAWAYS
+═══════════════════════════════ */
+.takeaways{display:grid;grid-template-columns:1fr 1fr;gap:1px;
+  background:var(--border);width:100%}
+.taway{background:var(--bg);padding:1.8rem 1.6rem;position:relative;
+  overflow:hidden;transition:background .25s ease;
+  display:flex;flex-direction:column;gap:.6rem}
+.taway:hover{background:var(--surface)}
+.tanum{font-family:var(--fd);font-size:clamp(48px,7vw,88px);
+  position:absolute;right:.15em;bottom:-.1em;
+  color:transparent;-webkit-text-stroke:1px var(--border);
+  line-height:1;user-select:none;pointer-events:none}
+.tasub{font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:var(--red)}
+.tatext{font-family:var(--fd);font-size:clamp(15px,1.8vw,22px);
+  letter-spacing:.03em;line-height:1.2;max-width:30ch}
+
+/* ═══════════════════════════════
+   SLIDE 18 — THANK YOU
+═══════════════════════════════ */
+.tymain{font-family:var(--fd);font-size:clamp(76px,12vw,178px);
+  line-height:.88;letter-spacing:-.01em;margin-bottom:1.6rem}
+.tymain em{font-family:var(--fa);font-style:italic;font-weight:900;color:var(--red)}
+.tysub{font-size:clamp(12px,1.2vw,16px);color:#555;font-weight:300;
+  letter-spacing:.03em;margin-bottom:2.4rem;max-width:52ch;line-height:1.7}
+.contacts{display:flex;flex-direction:column;gap:.55rem}
+.citem{display:flex;align-items:center;gap:.9rem;font-size:11px;letter-spacing:.12em;color:#2e2e2e}
+.citem .cico{font-size:13px;flex-shrink:0}
+.citem a{color:#333;text-decoration:none;transition:color .2s ease}
+.citem a:hover{color:var(--ivory)}
+.tybadge{position:absolute;bottom:3.2rem;right:7vw;font-size:9px;
+  letter-spacing:.12em;text-transform:uppercase;color:#1a1a1a;
+  max-width:55ch;text-align:right;line-height:1.9}
+
+/* (slide 4 styles moved to VERTICAL FLOWCHART block above) */
+
+/* ═══════════════════════════════
+   SLIDE 5 — IMAGE ICONS
+═══════════════════════════════ */
+.ccimg{width:32px;height:32px;object-fit:contain;filter:brightness(1.1)}
+
+/* ═══════════════════════════════
+   SLIDE 14 — SCENARIOS
+═══════════════════════════════ */
+.scenarios-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);width:100%}
+.scen-card{background:var(--bg);padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.4rem;
+  position:relative;overflow:hidden;transition:background .25s ease}
+.scen-card:hover{background:var(--surface)}
+.scen-card::after{content:'';position:absolute;top:0;left:0;height:2px;width:0;
+  background:var(--red);transition:width .35s ease}
+.scen-card:hover::after{width:100%}
+.scen-num{font-size:8px;letter-spacing:.22em;color:var(--red)}
+.scen-title{font-family:var(--fd);font-size:18px;letter-spacing:.05em;line-height:1.1;color:var(--ivory)}
+.scen-flows{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#3a3a3a;margin-top:.15rem}
+.scen-desc{font-size:14px;color:#484848;line-height:1.6;font-weight:300;margin-top:.1rem}
+
+/* Fix small font sizes globally for demo slides */
+.dcn{font-size:13.5px!important}
+.dclabel{font-size:10px!important}
+</style>
+</head>
+<body>
+
+<div class="progress"><div class="pfill" id="pfill" style="width:5.26%"></div></div>
+
+<div class="topbar">
+  <span class="bname">PFA</span>
+  <span class="bdot"></span>
+  <span class="bsub">UiPath Maestro · 2026</span>
+</div>
+<div class="counter"><span class="cur" id="cur">01</span> / 19</div>
+
+<div class="deck" id="deck">
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 1 · TITLE
+  ══════════════════════════════════════════ -->
+  <div class="slide active" data-index="0">
+    <div class="redline"></div>
+    <div class="s1bg"></div>
+    <h1 class="tmain s2">Personal<br>Finance <em>Automation</em></h1>
+    <p class="tsub s3">Agentic Orchestration with UiPath Maestro</p>
+    <div class="tmeta s4">
+      <span>Alexander Cortez Conde</span>
+      <span class="sep"></span>
+      <span>Automation Engineer</span>
+      <span class="sep"></span>
+      <span>May 2026</span>
+    </div>
+    <div class="ubadge s5">Built with UiPath Platform</div>
+    <div class="bgnum">01</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 2 · THE PROBLEM
+  ══════════════════════════════════════════ -->
+  <div class="slide" data-index="1">
+    <div class="redline"></div>
+    <div class="tag s1">The Challenge</div>
+    <h2 class="stitle s2">Managing Money<br>is <span style="font-family:var(--fa);font-style:italic;font-weight:900;color:var(--red)">Manual Work</span></h2>
+    <div class="twocol s3">
+      <ul class="plist">
+        <li><span class="ic">📬</span><span><strong>50+ bank emails per month</strong></span></li>
+        <li><span class="ic">🏷️</span><span><strong>Regex can't classify merchants</strong></span></li>
+        <li><span class="ic">📄</span><span><strong>Invoices shared as screenshots </strong></span></li>
+        <li><span class="ic">⚠️</span><span><strong>No fraud alerting</strong></span></li>
+        <li><span class="ic">📊</span><span><strong>No real-time dashboard</strong></span></li>
+      </ul>
+      <div class="inbox">
+        <div class="ihead">
+          <span>📧 GMAIL</span>
+          <span class="ibadge">127 unread</span>
+        </div>
+        <div class="erow ur"><span>💳</span><span>Retiro/Compra con tarjeta Banamex: TOLUGAS S.A. </span><span class="ea">−$850</span></div>
+        <div class="erow ur"><span>💳</span><span>Tu transferencia fue exitosa!</span><span class="ea">−$420</span></div>
+        <div class="erow"><span>💳</span><span>Depósito a cuenta Banamex</span><span class="ea" style="color:var(--green)">+$1,240 </span></div>
+        <div class="erow ur"><span>⚠️</span><span>Retiro/Compra con tarjeta Banamex: Costco Metepec</span><span class="ea" style="color:var(--orange)">−$299</span></div>
+        <div class="erow"><span>💳</span><span>Cargo a cuenta para pago a Establecimiento</span><span class="ea">−$185</span></div>
+        <div class="erow ur"><span>💳</span><span>Tu estado de cuenta esta disponible</span><span class="ea"></span></div>
+        <div class="erow" style="color:#1e1e1e;border:none;justify-items:center">
+          <span></span><span style="font-size:9px;color:#1e1e1e;text-align:center">··· 121 more messages</span><span></span>
+        </div>
+      </div>
+    </div>
+    <div class="bgnum">02</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 3 · WHY TRADITIONAL RPA FAILS 
+  ══════════════════════════════════════════ -->
+  <div class="slide" data-index="2">
+    <div class="redline"></div>
+    <div class="tag s1">CONTEXT MATTERS</div>
+    <h2 class="stitle s2">Why TRADITIONAL RPA Fails</h2>
+    <div class="vslayout s3">
+      <div class="gcard fuel">
+        <div class="gtxn">Transaction · Bank Statement</div>
+        <div class="gamt">SERVIGAS</div>
+        <div class="gmerch">SERVIGAS TOLUCA S.A. DE C.V.</div>
+        <div class="gcrow">
+          <span class="gcico">⛽</span>
+          <div class="gcname">Fuel<div class="sub">Transportation → Auto Fuel</div></div>
+        </div>
+        <div class="cbar"><div class="cfill fuel" data-target=""></div></div>
+        
+      </div>
+      <div class="vscenter">VS</div>
+      <div class="gcard home">
+        <div class="gtxn">Transaction · Bank Statement</div>
+        <div class="gamt">TOLUGAS</div>
+        <div class="gmerch">GAS DOMÉSTICO TOLUGAS S.A.</div>
+        <div class="gcrow">
+          <span class="gcico">🏠</span>
+          <div class="gcname">Home Services<div class="sub">Utilities → Natural Gas</div></div>
+        </div>
+        <div class="cbar"><div class="cfill home" data-target=""></div></div>
+        
+      </div>
+    </div>
+    <p class="gfooter s4"><strong>Same word "GAS".</strong> Completely different categories. Merchant name, amount pattern, and time-of-month are all signals — only an AI agent with contextual reasoning can distinguish them.</p>
+    <div class="bgnum">03</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 4 · ARCHITECTURE
+  ══════════════════════════════════════════ -->
+  <div class="slide" data-index="3" style="justify-content:flex-start;padding-top:4.5rem;padding-bottom:1.5rem">
+    <div class="redline"></div>
+    <div class="legend">
+      <div class="li2"><div class="ldot" style="background:var(--purple)"></div>Agent</div>
+      <div class="li2"><div class="ldot" style="background:var(--blue)"></div>Robot</div>
+      <div class="li2"><div class="ldot" style="background:var(--orange)"></div>Human</div>
+      <div class="li2"><div class="ldot" style="background:var(--green)"></div>Data</div>
+      <div class="li2"><div class="ldot" style="background:var(--yellow)"></div>Orchestrator</div>
+    </div>
+    <div class="tag s1">Solution Design</div>
+    <h2 class="stitle s2" style="font-size:clamp(28px,3.5vw,48px);margin-bottom:.8rem">Architecture Overview</h2>
+
+    <div class="arch-v2 s3">
+      <div class="arch-lanes">
+
+        <!-- ── FLOW 1 ── -->
+        <div class="fc-lane l1">
+          <div class="fc-llabl">Flow 1 · Email Classification</div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-node fc-dt"><img src="Assets/gmail.png" class="fc-img">Gmail</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-varr">↓</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-node fc-ag"><img src="Assets/uipath-agent.png" class="fc-img">Classifier Agent</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-varr">↓</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-diam-o"><div class="fc-diam-i">¿Financial?</div></div>
+          <div class="fc-br"><div class="fc-bconn"></div><span class="fc-blabel">No</span><span class="fc-harr">→</span><div class="fc-node fc-end">End</div></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-varr" style="color:#3a3a3a;font-size:8px">↓ Yes</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-diam-o"><div class="fc-diam-i">¿Unusual Txn?</div></div>
+          <div class="fc-br"><div class="fc-bconn"></div><span class="fc-blabel">No</span><span class="fc-harr">→</span><div class="fc-node fc-rb">Register</div><span class="fc-harr">→</span><div class="fc-node fc-end">End</div></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-varr" style="color:#3a3a3a;font-size:8px">↓ Yes</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-node fc-hu"><img src="Assets/Action Center.png" class="fc-img">Action Center</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-varr">↓</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-diam-o"><div class="fc-diam-i">Suspicious?</div></div>
+          <div class="fc-br"><div class="fc-bconn"></div><span class="fc-blabel">No</span><span class="fc-harr">→</span><div class="fc-node fc-rb">Register</div><span class="fc-harr">→</span><div class="fc-node fc-end">End</div></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-varr" style="color:#3a3a3a;font-size:8px">↓ Yes</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-node fc-or"><img src="Assets/jira.png" class="fc-img">Create Jira Ticket</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-varr">↓</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-node fc-end">End</div>
+          <div class="fc-sp"></div>
+        </div>
+
+        <!-- ── FLOW 2 ── -->
+        <div class="fc-lane l2">
+          <div class="fc-llabl">Flow 2 · Loan Reconciliation</div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-node fc-dt"><img src="Assets/gmail.png" class="fc-img">Gmail</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-varr">↓</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-diam-o"><div class="fc-diam-i">¿Telegram SS?</div></div>
+          <div class="fc-br"><div class="fc-bconn"></div><span class="fc-blabel">No</span><span class="fc-harr">→</span><div class="fc-node fc-or">Go to Flow 1</div></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-varr" style="color:#3a3a3a;font-size:8px">↓ Yes</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-node fc-rb"><img src="Assets/Document Understanding.png" class="fc-img">Get Data (DU)</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-plus">+</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-node fc-dt"><img src="Assets/sheets.png" class="fc-img">Loans Sheet</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-varr">↓</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-node fc-ag"><img src="Assets/uipath-agent.png" class="fc-img">Reconciliation Agent</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-varr">↓</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-diam-o"><div class="fc-diam-i">¿Matches?</div></div>
+          <div class="fc-br"><div class="fc-bconn"></div><span class="fc-blabel">Yes</span><span class="fc-harr">→</span><div class="fc-node fc-dt">Update Balance</div><span class="fc-harr">→</span><div class="fc-node fc-end">End</div></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-varr" style="color:#3a3a3a;font-size:8px">↓ No</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-node fc-hu"><img src="Assets/Action Center.png" class="fc-img">Action Center</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-varr">↓</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-diam-o"><div class="fc-diam-i">Identified?</div></div>
+          <div class="fc-br"><div class="fc-bconn"></div><span class="fc-blabel">Yes</span><span class="fc-harr">→</span><div class="fc-node fc-dt">Register Excel</div><span class="fc-harr">→</span><div class="fc-node fc-end">End</div></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-varr" style="color:#3a3a3a;font-size:8px">↓ No</div>
+          <div class="fc-sp"></div>
+
+          <div class="fc-sp"></div>
+          <div class="fc-node fc-end">End</div>
+          <div class="fc-sp"></div>
+        </div>
+
+      </div><!-- arch-lanes -->
+
+      <div class="abot">
+        <div class="astore"><span class="asi">📊</span><span>Google Sheets · Central Data Store</span></div>
+        <div class="aarr">→</div>
+        <div class="astore"><span class="asi">📈</span><span>Power BI · Live Dashboard</span></div>
+      </div>
+    </div>
+
+    <div class="bgnum">04</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 5 · COMPONENTS GRID
+  ══════════════════════════════════════════ -->
+  <div class="slide" data-index="4" style="justify-content:flex-start;padding-top:5rem">
+    <div class="redline"></div>
+    <div class="tag s1">Technology Stack</div>
+    <h2 class="stitle s2" style="margin-bottom:1.6rem">What Powers the Solution</h2>
+    <div class="cgrid s3">
+      <div class="ccard"><img class="ccimg" src="Assets/uipath-agent.png"><span class="ccname">Agent 1: Classifier</span><span class="ccdesc">LLM agent that reads bank emails and assigns category, type, and multiple details</span></div>
+      <div class="ccard"><img class="ccimg" src="Assets/uipath-agent.png"><span class="ccname">Agent 2: Reconciler</span><span class="ccdesc">Matches invoice data against loans transactions</span></div>
+      <div class="ccard"><img class="ccimg" src="Assets/uipath-maestro.png"><span class="ccname">UiPath Maestro</span><span class="ccdesc">Orchestration layer routing work between agents, robots, and humans</span></div>
+      <div class="ccard"><img class="ccimg" src="Assets/Document Understanding.png"><span class="ccname">Document Understanding</span><span class="ccdesc">Extraction of invoice fields — amount and vendor from screenshots</span></div>
+      <div class="ccard"><img class="ccimg" src="Assets/uipath-robot.png"><span class="ccname">Robots</span><span class="ccdesc">Perform RPA tasks to activate and continue the flow</span></div>
+      <div class="ccard"><img class="ccimg" src="Assets/Action Center.png"><span class="ccname">Action Center</span><span class="ccdesc">Human-in-the-loop app for unusual charges and possible fraud</span></div>
+      <div class="ccard"><img class="ccimg" src="Assets/sheets.png"><span class="ccname">Google Sheets</span><span class="ccdesc">Central structured data store for transactions, loans, categories, and reconciliation status</span></div>
+      <div class="ccard"><img class="ccimg" src="Assets/gmail.png"><span class="ccname">Gmail Integration</span><span class="ccdesc">Trigger source — new bank notification/purchase-realated emails initiate the full classification flow</span></div>
+      <div class="ccard"><img class="ccimg" src="Assets/google-drive.png"><span class="ccname">Google Drive</span><span class="ccdesc">Storage layer for JPG (Screenshots) invoices forwarded from Telegram before Document Understanding processing</span></div>
+      <div class="ccard"><img class="ccimg" src="Assets/jira.png"><span class="ccname">Jira</span><span class="ccdesc">Fraud case tracking — each suspicious transaction creates a Jira issue for full audit trail</span></div>
+      <div class="ccard"><img class="ccimg" src="Assets/telegram.png"><span class="ccname">Telegram Bot</span><span class="ccdesc">Invoice ingestion channel — bank screenshots sent via Telegram trigger the reconciliation flow</span></div>
+      <div class="ccard"><img class="ccimg" src="Assets/power-bi.png"><span class="ccname">Power BI</span><span class="ccdesc">Real-time financial dashboard fed by Sheets — spending trends and loan tracker</span></div>
+    </div>
+    <div class="bgnum">05</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 6 · PROMPT ENGINEERING
+  ══════════════════════════════════════════ -->
+ <div class="slide" data-index="5" style="justify-content:flex-start;padding-top:5rem">
+    <div class="redline"></div>
+    <div class="tag s1">AI Development</div>
+    <h2 class="stitle s2" style="margin-bottom:1.8rem">Prompt Engineering:<br><span style="font-size:.65em;color:var(--iv60);letter-spacing:.04em">Building the Classifier Step by Step</span></h2>
+    <div class="tlwrap s3">
+      <div class="tltrack">
+        <div class="tlnode fail">
+          <div class="tlcircle">1</div>
+          <div class="tlcont">
+            <div class="tliter">Version 1</div>
+            <div class="tlchange">Role + Basic categories + JSON format</div>
+            <div class="tlres">Output too generic, missing specificity ❌</div>
+          </div>
+        </div>
+        <div class="tlnode fail">
+          <div class="tlcircle">2</div>
+          <div class="tlcont">
+            <div class="tliter">Version 2</div>
+            <div class="tlchange">Added real email examples + expected JSON responses</div>
+            <div class="tlres">DIS.EFE classified as Purchase instead of ATM withdrawal ❌</div>
+          </div>
+        </div>
+        <div class="tlnode fail">
+          <div class="tlcircle">3</div>
+          <div class="tlcont">
+            <div class="tliter">Version 3</div>
+            <div class="tlchange">New type: ATM_Withdrawal + known merchant names</div>
+            <div class="tlres">Own-account transfers classified as purchases ❌</div>
+          </div>
+        </div>
+        <div class="tlnode fail">
+          <div class="tlcircle">4</div>
+          <div class="tlcont">
+            <div class="tliter">Version 4</div>
+            <div class="tlchange">Added Savings category + Bank_Transfer type</div>
+            <div class="tlres">Eval score: 83.2% → 87.3% → 89% ✅</div>
+          </div>
+        </div>
+        <div class="tlnode done">
+          <div class="tlcircle">5</div>
+          <div class="tlcont">
+            <div class="tliter">Version 5</div>
+            <div class="tlchange">Context Grounding with 281 real transactions</div>
+            <div class="tlres">Final score: 89% with RAG-enhanced classification ✅</div>
+          </div>
+        </div>
+      </div>
+      <div class="accwrap">
+        <div class="acchead">
+          <span>Evaluation Set Score — 14 test cases with real emails</span>
+          <span class="accscore" id="accscore">0%</span>
+        </div>
+        <div class="accbg"><div class="accfill"></div></div>
+        <div class="accms">
+          <span>v1</span><span>v2</span><span>83.2%</span><span>93.6%</span><span>89% + RAG</span>
+        </div>
+      </div>
+    </div>
+    <div class="bgnum">06</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 7 · 5 TECHNIQUES
+  ══════════════════════════════════════════ -->
+  <div class="slide" data-index="6" style="justify-content:flex-start;padding-top:5rem">
+    <div class="redline"></div>
+    <div class="tag s1">Prompt Engineering · Techniques</div>
+    <h2 class="stitle s2" style="margin-bottom:1.4rem">5 Prompt Engineering<br><span style="font-size:.65em;color:var(--iv60)">Techniques Applied</span></h2>
+    <div class="tcards s3">
+      <div class="tcard">
+  <span class="tcnum">01</span>
+  <span class="tcico">🎭</span>
+  <span class="tcname">Role Definition</span>
+  <span class="tcdesc">Defined the agent as a personal finance classifier specialized in Mexican banking notifications</span>
+</div>
+<div class="tcard">
+  <span class="tcnum">02</span>
+  <span class="tcico">📋</span>
+  <span class="tcname">Structured Output</span>
+  <span class="tcdesc">Strict JSON schema with 7 typed fields — enabling automated routing in Maestro without parsing</span>
+</div>
+<div class="tcard">
+  <span class="tcnum">03</span>
+  <span class="tcico">📝</span>
+  <span class="tcname">Few-Shot Examples</span>
+  <span class="tcdesc">Real email bodies paired with expected JSON responses — teaching the agent by example, not just by rules</span>
+</div>
+<div class="tcard">
+  <span class="tcnum">04</span>
+  <span class="tcico">⚙️</span>
+  <span class="tcname">Field-Level Specifications</span>
+  <span class="tcdesc">Detailed rules per JSON field — explicit merchant lists, category distinctions, and critical edge cases like gas types</span>
+</div>
+<div class="tcard">
+  <span class="tcnum">05</span>
+  <span class="tcico">👤</span>
+  <span class="tcname">User Profile for Anomaly Detection</span>
+  <span class="tcdesc">Defined typical spending patterns so the agent flags cosmetics and unfamiliar merchants as possible card lending</span>
+</div>
+    </div>
+<div class="s4">
+  <div class="code-label">Technique 4 · Field-Level Specifications — actual prompt text</div>
+  <pre class="codeblock"><code><span class="cm">-- CRITICAL DISTINCTION - GAS TYPES: ----------------------------------------</span>
+<span class="hl">- Vehicle fuel:  </span><span class="str">SERV RUDIGAS, PEMEX, BP, SHELL, OXXO GAS</span>     <span class="cm">→ Transportation</span>
+<span class="hl">- Domestic gas:  </span><span class="str">TOLUGAS, GAS IMPERIAL, ZETA GAS, GASMART</span>     <span class="cm">→ Home</span>
+<span class="kw">These are completely different categories. Never confuse them.</span></code></pre>
+</div>
+    <div class="bgnum">07</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 8 · EVALUATION SETS
+  ══════════════════════════════════════════ -->
+  <div class="slide" data-index="7" style="justify-content:flex-start;padding-top:5rem">
+    <div class="redline"></div>
+    <div class="tag s1">Validation · Real Data</div>
+    <h2 class="stitle s2" style="margin-bottom:1.8rem">Testing with Real Data</h2>
+    <div class="evallayout s3">
+      <div>
+        <div class="stat-trio">
+          <div class="statcard">
+            <span class="statnum" id="stat-cases">0</span>
+            <span class="statlbl">Test cases in<br>evaluation set</span>
+          </div>
+          <div class="statcard">
+            <span class="statnum" id="stat-txns">0</span>
+            <span class="statlbl">Real transactions<br>analyzed</span>
+          </div>
+          <div class="statcard">
+            <span class="statnum green" id="stat-acc">0%</span>
+            <span class="statlbl">Final classification<br>accuracy</span>
+          </div>
+        </div>
+        <div class="code-label" style="margin-bottom:.5rem">Score progression · prompt versions</div>
+        <div class="scorebars">
+          <div class="sbar-row">
+            <span class="sbar-lbl">v3</span>
+            <div class="sbar-bg"><div class="sbar-fill" style="background:var(--orange)" data-w="83.2"></div></div>
+            <span class="sbar-val">83.2%</span>
+          </div>
+          <div class="sbar-row">
+            <span class="sbar-lbl">v4</span>
+            <div class="sbar-bg"><div class="sbar-fill" style="background:var(--yellow)" data-w="87.3"></div></div>
+            <span class="sbar-val">87.3%</span>
+          </div>
+          <div class="sbar-row">
+            <span class="sbar-lbl">v5</span>
+            <div class="sbar-bg"><div class="sbar-fill" style="background:var(--green)" data-w="89"></div></div>
+            <span class="sbar-val">89%</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="code-label" style="margin-bottom:.7rem">Evaluation cases — real bank emails</div>
+        <table class="evtable">
+          <thead>
+            <tr><th>Case</th><th>Expected</th><th>Result</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Gas station (RUDIGAS)</td><td>Transportation</td><td>✅</td></tr>
+            <tr><td>Domestic gas (GAS IMPERIAL)</td><td>Home</td><td>✅</td></tr>
+            <tr><td>Cosmetics (MARY KAY)</td><td>Unusual</td><td>✅</td></tr>
+            <tr><td>ATM withdrawal</td><td>ATM_Withdrawal</td><td>✅</td></tr>
+            <tr><td>Diego Cortez</td><td>Bank_Transfer</td><td>✅</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:1.1rem;font-size:9px;color:#252525;line-height:1.8;border-left:2px solid var(--border);padding-left:1rem">
+        
+        </div>
+      </div>
+    </div>
+    <div class="bgnum">08</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 9 · CONTEXT GROUNDING (RAG)
+<!-- ══════════════════════════════════════════
+     SLIDE 9 · CONTEXT GROUNDING (RAG)
+══════════════════════════════════════════ -->
+<div class="slide" data-index="8" style="justify-content:flex-start;padding-top:5rem">
+  <div class="redline"></div>
+  <div class="tag s1">AI Architecture · Retrieval</div>
+  <h2 class="stitle s2" style="margin-bottom:1.8rem">Context Grounding:<br><span style="font-size:.65em;color:var(--iv60)">My Spending History as Knowledge Base</span></h2>
+
+  <div class="twocol s3" style="align-items:start;gap:3vw">
+
+    <!-- SIN RAG -->
+    <div style="border:1px solid rgba(214,50,41,.25);background:rgba(214,50,41,.03);padding:1.6rem 1.8rem">
+      <div style="font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--red);margin-bottom:1.1rem;display:flex;align-items:center;gap:10px">
+        <span style="width:20px;height:1px;background:var(--red);display:inline-block"></span>
+        Without Context Grounding
+      </div>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:.9rem">
+        <li style="display:flex;align-items:flex-start;gap:.8rem;font-size:14px;color:#555;font-weight:300;line-height:1.6">
+          <span style="color:var(--red);flex-shrink:0">✗</span>
+          Merchant rules hardcoded in the prompt
+        </li>
+        <li style="display:flex;align-items:flex-start;gap:.8rem;font-size:14px;color:#555;font-weight:300;line-height:1.6">
+          <span style="color:var(--red);flex-shrink:0">✗</span>
+          New merchant? → Edit prompt → Re-deploy → Re-test
+        </li>
+        <li style="display:flex;align-items:flex-start;gap:.8rem;font-size:14px;color:#555;font-weight:300;line-height:1.6">
+          <span style="color:var(--red);flex-shrink:0">✗</span>
+          Agent only knows what the prompt says
+        </li>
+      </ul>
+    </div>
+
+    <!-- CON RAG -->
+    <div style="border:1px solid rgba(61,186,110,.25);background:rgba(61,186,110,.03);padding:1.6rem 1.8rem">
+      <div style="font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--green);margin-bottom:1.1rem;display:flex;align-items:center;gap:10px">
+        <span style="width:20px;height:1px;background:var(--green);display:inline-block"></span>
+        With Context Grounding
+      </div>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:.9rem">
+        <li style="display:flex;align-items:flex-start;gap:.8rem;font-size:14px;color:#555;font-weight:300;line-height:1.6">
+          <span style="color:var(--green);flex-shrink:0">✓</span>
+          SpendingProfile.txt with 281 real transactions
+        </li>
+        <li style="display:flex;align-items:flex-start;gap:.8rem;font-size:14px;color:#555;font-weight:300;line-height:1.6">
+          <span style="color:var(--green);flex-shrink:0">✓</span>
+          New merchant? → Edit the file → Done
+        </li>
+        <li style="display:flex;align-items:flex-start;gap:.8rem;font-size:14px;color:#555;font-weight:300;line-height:1.6">
+          <span style="color:var(--green);flex-shrink:0">✓</span>
+          Agent consults real history at every classification
+        </li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- Bottom quote -->
+  <div class="s4" style="margin-top:2rem;border-left:3px solid var(--red);padding-left:1.5rem;background:var(--rdim);padding:1.2rem 1.5rem;margin-top:2rem">
+    <div style="font-family:var(--fa);font-style:italic;font-weight:900;font-size:clamp(16px,2vw,24px);color:var(--ivory);line-height:1.3">
+      "Update the document, not the prompt."
+    </div>
+    <div style="font-size:11px;color:#444;letter-spacing:.1em;margin-top:.5rem">
+      Context Grounding · Zero prompt edits to add new merchant rules
+    </div>
+  </div>
+
+  <div class="bgnum">09</div>
+</div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 10 · MAESTRO BPMN
+  ══════════════════════════════════════════ -->
+  <div class="slide" data-index="9" style="justify-content:flex-start;padding-top:5rem;padding-bottom:3rem">
+    <div class="redline"></div>
+    <div class="tag s1">Process Design · UiPath Maestro</div>
+    <h2 class="stitle s2" style="margin-bottom:1.2rem">The Orchestration Layer</h2>
+    <div class="bpmn-outer s3">
+      <div class="bpmn-placeholder" style="min-height:400px">
+        <img src="Assets/uipath-diagram-maestro.png" style="width:100%;height:100%;object-fit:contain;padding:1rem;mix-blend-mode:screen">
+</div>
+
+    </div>
+    <div class="bgnum">10</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 11 · DEMO TRANSITION
+  ══════════════════════════════════════════ -->
+  <div class="slide" data-index="10" style="align-items:center;justify-content:center">
+    <div class="redline"></div>
+    <div class="demoglow"></div>
+    <div class="demomain s2">Let me show<br>you <em>how it</em><br>works.</div>
+    <div class="bgnum">11</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 12 · DEMO FLOW 1
+  ══════════════════════════════════════════ -->
+  <div class="slide" data-index="11" style="justify-content:flex-start;padding-top:4.5rem">
+    <div class="redline"></div>
+    <div class="tag s1">Live Demo · Flow 1</div>
+    <h2 class="stitle s2" style="margin-bottom:1.2rem">Flow 1: Email Classification</h2>
+    <div class="democases s3">
+      <!-- Case 1: Normal Transaction -->
+      <div class="democase green">
+        <span class="dclabel">Case 1 · Normal Transaction</span>
+        <div class="dcnodes">
+          <div class="dcn inp">📧 Gmail</div>
+          <span class="dca">→</span>
+          <div class="dcn proc">🤖 Classifier Agent</div>
+          <span class="dca">→</span>
+          <div class="dcn out">¿Financial? Yes</div>
+          <span class="dca">→</span>
+          <div class="dcn out">Normal Transaction</div>
+          <span class="dca">→</span>
+          <div class="dcn proc rb">Register Transaction</div>
+          <span class="dca">→</span>
+          <div class="dcn out">✅ End</div>
+        </div>
+      </div>
+      <!-- Case 2: Unusual Transaction -->
+      <div class="democase yellow">
+        <span class="dclabel">Case 2 · Unusual Transaction → Review</span>
+        <div class="dcnodes">
+          <div class="dcn inp">📧 Gmail</div>
+          <span class="dca">→</span>
+          <div class="dcn proc">🤖 Classifier Agent</div>
+          <span class="dca">→</span>
+          <div class="dcn out warn">Unusual Transaction</div>
+          <span class="dca">→</span>
+          <div class="dcn act">✋ Action Center</div>
+          <span class="dca">→</span>
+          <div class="dcn out warn">
+            Suspicious? No</div>
+          <span class="dca">→</span>
+          <div class="dcn proc rb">Register Transaction</div>
+          <span class="dca">→</span>
+          <div class="dcn out">✅ End</div>
+        </div>
+      </div>
+      <!-- Case 3: Suspicious / Fraud -->
+      <div class="democase dred">
+        <span class="dclabel">Case 3 · Unusual Transaction → Fraud</span>
+        <div class="dcnodes">
+          <div class="dcn inp">📧 Gmail</div>
+          <span class="dca">→</span>
+          <div class="dcn proc">🤖 Classifier Agent</div>
+          <span class="dca">→</span>
+          <div class="dcn out warn">Unusual Transaction</div>
+          <span class="dca">→</span>
+          <div class="dcn act">✋ Action Center</div>
+          <span class="dca">→</span>
+          <div class="dcn out danger">
+Suspicious? Yes</div>
+          <span class="dca">→</span>
+          <div class="dcn out danger">🎫 Create Jira Ticket</div>
+          <span class="dca">→</span>
+          <div class="dcn out">✅ End</div>
+        </div>
+      </div>
+      <!-- Case 4: Non-financial email -->
+      <div class="democase" style="border-color:rgba(78,159,232,.2);background:rgba(78,159,232,.03)">
+        <span class="dclabel" style="color:var(--blue)">Case 4 · Non-Financial Email</span>
+        <div class="dcnodes">
+          <div class="dcn inp">📧 Gmail</div>
+          <span class="dca">→</span>
+          <div class="dcn proc">🤖 Classifier Agent</div>
+          <span class="dca">→</span>
+          <div class="dcn" style="border-color:rgba(78,159,232,.3);color:#95c8f5">¿Financial? No</div>
+          <span class="dca">→</span>
+          <div class="dcn out">✅ End (ignored)</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:.8rem;font-size:12px;color:#252525;font-style:italic;letter-spacing:.08em" class="s4">
+      
+    </div>
+    <div class="bgnum">12</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 13 · DEMO — FLOW 2 OVERVIEW
+  ══════════════════════════════════════════ -->
+  <div class="slide" data-index="12" style="justify-content:flex-start;padding-top:4.5rem">
+    <div class="redline"></div>
+    <div class="tag s1">Live Demo · Flow 2</div>
+    <h2 class="stitle s2" style="margin-bottom:1.2rem">Flow 2: Loan Reconciliation</h2>
+    <div class="democases s3">
+      <!-- Case 1: Telegram SS received → match found -->
+      <div class="democase" style="border-color:rgba(42,187,168,.25);background:rgba(42,187,168,.03)">
+        <span class="dclabel" style="color:var(--teal)">Case 1 · Telegram Screenshot → Match Found</span>
+        <div class="dcnodes">
+          <div class="dcn inp">📧 Gmail</div>
+          <span class="dca">→</span>
+          <div class="dcn" style="border-color:rgba(42,187,168,.3);color:var(--teal)">¿Telegram SS? Yes</div>
+          <span class="dca">→</span>
+          <div class="dcn proc rb">DU — Get Data</div>
+          <span class="dca">+</span>
+          <div class="dcn out">Loans Sheet</div>
+          <span class="dca">→</span>
+          <div class="dcn proc">🤖 Reconciliation Agent</div>
+          <span class="dca">→</span>
+          <div class="dcn out warn">¿Matches? Yes</div>
+          <span class="dca">→</span>
+          <div class="dcn out">✅ Update Balance</div>
+        </div>
+      </div>
+      <!-- Case 2: No match → Action Center → Identified -->
+      <div class="democase yellow">
+        <span class="dclabel">Case 2 · No Match → Review → Identified</span>
+        <div class="dcnodes">
+          <div class="dcn inp">📧 Gmail</div>
+          <span class="dca">→</span>
+          <div class="dcn" style="border-color:rgba(42,187,168,.3);color:var(--teal)">¿Telegram SS? Yes</div>
+          <span class="dca">→</span>
+          <div class="dcn proc rb">DU — Get Data</div>
+          <span class="dca">→</span>
+          <div class="dcn proc">🤖 Reconciliation Agent</div>
+          <span class="dca">→</span>
+          <div class="dcn out warn">¿Matches? No</div>
+          <span class="dca">→</span>
+          <div class="dcn act">✋ Action Center</div>
+          <span class="dca">→</span>
+          <div class="dcn out warn">Identified? Yes</div>
+          <span class="dca">→</span>
+          <div class="dcn out">📊 Register Excel</div>
+        </div>
+      </div>
+      <!-- Case 3: No match → Action Center → Not Identified -->
+      <div class="democase dred">
+        <span class="dclabel">Case 3 · No Match → Review → Not Identified</span>
+        <div class="dcnodes">
+          <div class="dcn inp">📧 Gmail</div>
+          <span class="dca">→</span>
+          <div class="dcn" style="border-color:rgba(42,187,168,.3);color:var(--teal)">¿Telegram SS? Yes</div>
+          <span class="dca">→</span>
+          <div class="dcn proc rb">DU — Get Data</div>
+          <span class="dca">→</span>
+          <div class="dcn proc">🤖 Reconciliation Agent</div>
+          <span class="dca">→</span>
+          <div class="dcn out warn">¿Matches? No</div>
+          <span class="dca">→</span>
+          <div class="dcn act">✋ Action Center</div>
+          <span class="dca">→</span>
+          <div class="dcn out danger">Idetified? No</div>
+          <span class="dca">→</span>
+          <div class="dcn out">✅ End</div>
+        </div>
+      </div>
+      <!-- Case 4: Not Telegram → Go to Flow 1 -->
+      <div class="democase" style="border-color:rgba(78,159,232,.2);background:rgba(78,159,232,.03)">
+        <span class="dclabel" style="color:var(--blue)">Case 4 · Not a Telegram Screenshot → Flow 1</span>
+        <div class="dcnodes">
+          <div class="dcn inp">📧 Gmail</div>
+          <span class="dca">→</span>
+          <div class="dcn" style="border-color:rgba(78,159,232,.3);color:#95c8f5">¿Telegram SS? No</div>
+          <span class="dca">→</span>
+          <div class="dcn" style="border-color:rgba(212,184,74,.3);color:#e8d080">Go to Flow 1</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:.8rem;font-size:12px;color:#252525;font-style:italic;letter-spacing:.08em" class="s4">
+      Live demo with real bank transfer screenshots from Telegram
+    </div>
+    <div class="bgnum">13</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 14 · REAL-WORLD SCENARIOS
+  ══════════════════════════════════════════ -->
+  <div class="slide" data-index="13" style="justify-content:flex-start;padding-top:4.5rem">
+    <div class="redline"></div>
+    <div class="tag s1">Real-World Use Cases</div>
+    <h2 class="stitle s2" style="margin-bottom:1.2rem">Real-World Scenarios</h2>
+    <div class="scenarios-grid s3">
+      <div class="scen-card">
+        <span class="scen-num">CASE 01</span>
+        <span class="scen-title">Standard Card Purchase</span>
+        <span class="scen-flows">Flow 1 · Normal Transaction</span>
+        <span class="scen-desc">A purchase notification arrives. The Classifier identifies it as a normal transaction. The Robot registers it automatically in Sheets. No human intervention required.</span>
+      </div>
+      <div class="scen-card">
+        <span class="scen-num">CASE 02</span>
+        <span class="scen-title">Family Member Borrows Card</span>
+        <span class="scen-flows">Flow 1 + Flow 2</span>
+        <span class="scen-desc">A family member makes an online purchase with my card. The email arrives, I confirm it as a loan via Action Center. It's logged in both Transactions and Loans. 15 days later, they send a payment screenshot via Telegram — it's processed automatically and the outstanding balance is updated.</span>
+      </div>
+      <div class="scen-card">
+        <span class="scen-num">CASE 03</span>
+        <span class="scen-title">Partial Loan Repayment</span>
+        <span class="scen-flows">Flow 1 + Flow 2</span>
+        <span class="scen-desc">A family member uses my card at a local business. I confirm the loan via Action Center and it's registered. Later, they forward a Telegram payment screenshot — the system matches it, applies the partial payment, and clears the remaining balance.</span>
+      </div>
+      <div class="scen-card">
+        <span class="scen-num">CASE 04</span>
+        <span class="scen-title">Unregistered Incoming Transfer</span>
+        <span class="scen-flows">Flow 2 · Unregistered</span>
+        <span class="scen-desc">Someone sends money and forwards the transfer screenshot via Telegram, but the loan wasn't previously registered. It reaches Action Center for review — I confirm it's a repayment and it's manually logged in the spreadsheet.</span>
+      </div>
+      <div class="scen-card">
+        <span class="scen-num">CASE 05</span>
+        <span class="scen-title">Suspicious Charge</span>
+        <span class="scen-flows">Flow 1 · Fraud Path</span>
+        <span class="scen-desc">A PayPal charge notification arrives — I never use PayPal. The Classifier flags it as Unusual, routes it to Action Center. I confirm it's suspicious and a Jira ticket is created automatically for follow-up.</span>
+      </div>
+      <div class="scen-card">
+        <span class="scen-num">CASE 06</span>
+        <span class="scen-title">Non-Financial Email</span>
+        <span class="scen-flows">Flow 1 · Not Financial</span>
+        <span class="scen-desc">A marketing email, newsletter, or promotion arrives. The Classifier detects it contains no financial or banking content. The flow ends immediately — no registration, no action taken.</span>
+      </div>
+    </div>
+    <div class="bgnum">14</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 15 · POWER BI DASHBOARD
+  ══════════════════════════════════════════ -->
+  <div class="slide" data-index="14" style="justify-content:flex-start;padding-top:5rem;padding-bottom:3rem">
+    <div class="redline"></div>
+    <div class="tag s1">Reporting · Power BI</div>
+    <h2 class="stitle s2" style="margin-bottom:1.2rem">The Unified Dashboard</h2>
+    <div class="pbi-outer s3">
+      <div class="pbi-ph">
+        <img src="Assets/dashboard.png" style="width:100%;height:100%;object-fit:contain;padding:1rem">
+      </div>
+    </div>
+    <div class="bgnum">15</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 15 · CHALLENGES & LESSONS
+  ══════════════════════════════════════════ -->
+  <div class="slide" data-index="15" style="justify-content:flex-start;padding-top:5rem">
+    <div class="redline"></div>
+    <div class="tag s1">Retrospective</div>
+    <h2 class="stitle s2" style="margin-bottom:1.5rem">Challenges &amp;<br><span style="font-size:.65em;color:var(--iv60)">Lessons Learned</span></h2>
+    <div class="challenges s3">
+      <div class="chcard">
+        <span class="chico">⚡</span>
+        <span class="chnum">01</span>
+        <span class="chtitle">Robot Units Limit</span>
+        <span class="chchal">Community Plan: 300 runs/month. Forced efficient testing and smart debugging strategies.</span>
+        <span class="chlessn">Design for minimal robot execution. Let agents handle logic — robots handle I/O only.</span>
+      </div>
+      <div class="chcard">
+        <span class="chico">🔄</span>
+        <span class="chnum">02</span>
+        <span class="chtitle">Variable Types</span>
+        <span class="chchal">Objects vs Strings between Maestro components caused silent failures mid-flow.</span>
+        <span class="chlessn">Always validate data types at every Maestro boundary. Log every input and output.</span>
+      </div>
+      <div class="chcard">
+        <span class="chico">🤖</span>
+        <span class="chnum">03</span>
+        <span class="chtitle">Telegram → Google Integration</span>
+        <span class="chchal">Built a Python bot that receives bank screenshots via Telegram and automatically forwards them to Gmail and saves them to Google Drive.</span>
+        <span class="chlessn">Python + Telegram Bot API + Gmail API + Google Drive API — wired together in under 100 lines. No UiPath needed for this layer</span>
+      </div>
+      <div class="chcard">
+        <span class="chico">🔁</span>
+        <span class="chnum">04</span>
+        <span class="chtitle">Prompt Iteration</span>
+        <span class="chchal">Prompts are never "done". Each new email format reveals new edge cases and failures.</span>
+        <span class="chlessn">Evaluation sets catch regressions. Treat prompts like code — version and test them.</span>
+      </div>
+      <div class="chcard">
+        <span class="chico">📊</span>
+        <span class="chnum">05</span>
+        <span class="chtitle">Sheets as Database</span>
+        <span class="chchal">Works for MVP. No RBAC, limited queries, concurrency risks at any real scale.</span>
+        <span class="chlessn">Production needs SQL or SharePoint. Sheets was the right call for rapid iteration.</span>
+      </div>
+    </div>
+    <div class="bgnum">16</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 16 · ROADMAP
+  ══════════════════════════════════════════ -->
+  <div class="slide" data-index="16" style="justify-content:flex-start;padding-top:5rem">
+    <div class="redline"></div>
+    <div class="tag s1">Vision · Roadmap</div>
+    <h2 class="stitle s2" style="margin-bottom:1.8rem">What's Next</h2>
+    <div class="roadmap-grid s3">
+      <div class="phase-card">
+        <div class="phase-lbl p2">Phase 2 · Near-Term</div>
+        <div class="phase-title">Build Out</div>
+        <ul class="phase-items">
+          <li><span class="pic">📱</span><span>WhatsApp direct integration — no Telegram forwarding required</span></li>
+          <li><span class="pic">⏰</span><span>Automated payment reminders based on loan tracker data</span></li>
+          <li><span class="pic">🗄️</span><span>SQL database migration from Google Sheets for scalability and RBAC</span></li>
+          <li><span class="pic">📧</span><span>Automated monthly spending reports delivered via email</span></li>
+        </ul>
+      </div>
+      <div class="phase-card" style="border-color:rgba(155,110,243,.2);background:rgba(155,110,243,.02)">
+        <div class="phase-lbl p3">Phase 3 · Future Vision</div>
+        <div class="phase-title">Scale Up</div>
+        <ul class="phase-items">
+          
+          <li><span class="pic">📉</span><span>Predictive spending alerts based on personal historical patterns</span></li>
+          <li><span class="pic">🏢</span><span>Enterprise version with ServiceNow and ERP system integration</span></li>
+          
+        </ul>
+      </div>
+    </div>
+    <div class="bgnum">17</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 17 · KEY TAKEAWAYS
+  ══════════════════════════════════════════ -->
+  <div class="slide" data-index="17" style="justify-content:flex-start;padding-top:5rem">
+    <div class="redline"></div>
+    <div class="tag s1">Summary</div>
+    <h2 class="stitle s2" style="margin-bottom:1.8rem">Key Takeaways</h2>
+    <div class="takeaways s3">
+      <div class="taway">
+        <span class="tanum">1</span>
+        <span class="tasub">Orchestration</span>
+        <span class="tatext">Agents classify. Robots execute. Humans validate. Maestro orchestrates all three.</span>
+      </div>
+      <div class="taway">
+        <span class="tanum">2</span>
+        <span class="tasub">Methodology</span>
+        <span class="tatext">Prompt engineering is iterative — 83% → 89% through systematic, data-driven refinement.</span>
+      </div>
+      <div class="taway">
+        <span class="tanum">3</span>
+        <span class="tasub">Adaptability</span>
+        <span class="tatext">Context Grounding makes agents adaptable — update the document, not the prompt.</span>
+      </div>
+      <div class="taway">
+        <span class="tanum">4</span>
+        <span class="tasub">Credibility</span>
+        <span class="tatext">Real problems make the best demos — every example came from my actual inbox.</span>
+      </div>
+    </div>
+    <div class="bgnum">18</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 18 · THANK YOU
+  ══════════════════════════════════════════ -->
+  <div class="slide" data-index="18">
+    <div class="redline"></div>
+    <div class="s1bg"></div>
+    <h1 class="tymain s2">Thank <em>You</em></h1>
+    <p class="tysub s3">I'm happy to answer questions or dive deeper into any component of this system.</p>
+    <div class="contacts s4">
+      <div class="citem"><span class="cico">👤</span><span>Alexander Cortez Conde</span></div>
+      <div class="citem"><span class="cico">📧</span><a href="mailto:cortez.conde.alexander@gmail.com">cortez.conde.alexander@gmail.com</a></div>
+      <div class="citem"><span class="cico">🔗</span><a href="#">linkedin.com/in/alexander-cortez-conde</a></div>
+    </div>
+    <div class="tybadge s5">Built with UiPath Maestro · AI Agents · Document Understanding · Action Center</div>
+    <div class="bgnum">19</div>
+  </div>
+
+</div><!-- /deck -->
+
+<nav class="nav">
+  <div class="dots" id="dots">
+    <div class="dot active" data-goto="0"></div>
+    <div class="dot" data-goto="1"></div>
+    <div class="dot" data-goto="2"></div>
+    <div class="dot" data-goto="3"></div>
+    <div class="dot" data-goto="4"></div>
+    <div class="dot" data-goto="5"></div>
+    <div class="dot" data-goto="6"></div>
+    <div class="dot" data-goto="7"></div>
+    <div class="dot" data-goto="8"></div>
+    <div class="dot" data-goto="9"></div>
+    <div class="dot" data-goto="10"></div>
+    <div class="dot" data-goto="11"></div>
+    <div class="dot" data-goto="12"></div>
+    <div class="dot" data-goto="13"></div>
+    <div class="dot" data-goto="14"></div>
+    <div class="dot" data-goto="15"></div>
+    <div class="dot" data-goto="16"></div>
+    <div class="dot" data-goto="17"></div>
+    <div class="dot" data-goto="18"></div>
+  </div>
+  <button class="nbtn" id="prev" disabled>
+    <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+      <path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  <button class="nbtn" id="next">
+    <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+      <path d="M5 2L10 7L5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+</nav>
+<div class="kbdh"><span class="kbd">←</span><span class="kbd">→</span><span style="margin-left:4px">Navigate</span></div>
+
+<script>
+const TOTAL = 19;
+const slides  = document.querySelectorAll('.slide');
+const dots    = document.querySelectorAll('.dot');
+const prev    = document.getElementById('prev');
+const next    = document.getElementById('next');
+const curEl   = document.getElementById('cur');
+const pfill   = document.getElementById('pfill');
+let cur = 0;
+const saved = sessionStorage.getItem('slide');
+if (saved) {
+  // Quitar active de la slide 0
+  slides[0].classList.remove('active');
+  cur = parseInt(saved);
+  // Activar la slide correcta
+  slides[cur].classList.add('active');
+  dots.forEach((d,i) => d.classList.toggle('active', i === cur));
+  curEl.textContent = String(cur+1).padStart(2,'0');
+  prev.disabled = cur === 0;
+  next.disabled = cur === TOTAL-1;
+  pfill.style.width = ((cur+1)/TOTAL*100) + '%';
+}
+
+
+function goTo(idx) {
+  if (idx < 0 || idx >= TOTAL) return;
+  const old = cur;
+
+  // reset animations for slides we're leaving
+  if (old === 2) resetGas();
+  if (old === 5) resetAcc();
+  if (old === 7) resetEval();
+
+  slides[old].classList.remove('active');
+  slides[old].classList.add('exit');
+  setTimeout(() => slides[old].classList.remove('exit'), 400);
+
+  cur = idx;
+  sessionStorage.setItem('slide', cur);  // ← agrega esta línea aquí
+slides[cur].classList.add('active')
+  slides[cur].classList.add('active');
+  dots.forEach((d,i) => d.classList.toggle('active', i === cur));
+  curEl.textContent = String(cur+1).padStart(2,'0');
+  prev.disabled = cur === 0;
+  next.disabled = cur === TOTAL-1;
+  pfill.style.width = ((cur+1)/TOTAL*100) + '%';
+
+  if (cur === 2) triggerGas();
+  if (cur === 5) triggerAcc();
+  if (cur === 7) triggerEval();
+}
+
+prev.addEventListener('click', () => goTo(cur-1));
+next.addEventListener('click', () => goTo(cur+1));
+dots.forEach((d,i) => d.addEventListener('click', () => goTo(i)));
+document.addEventListener('keydown', e => {
+  if (e.key==='ArrowRight'||e.key==='ArrowDown') goTo(cur+1);
+  if (e.key==='ArrowLeft' ||e.key==='ArrowUp')   goTo(cur-1);
+});
+document.querySelector('.bname').addEventListener('click', () => goTo(0));
+
+/* Slide 3 — confidence bars */
+
+function resetGas() {
+  document.querySelectorAll('.cfill').forEach(f => {
+    f.style.transition = 'none'; f.style.width = '0';
+    requestAnimationFrame(() => { f.style.transition = ''; });
+  });
+}
+
+/* Slide 6 — accuracy counter */
+function triggerAcc() {
+  const bar = document.querySelector('.accfill');
+  bar.style.transition = 'none';
+  bar.style.width = '0';
+  setTimeout(() => {
+    bar.style.transition = 'width 1.2s 1s cubic-bezier(.16,1,.3,1)';
+    bar.style.width = '89%';
+    countUp(document.getElementById('accscore'), 0, 89, 2200, 0, '%');
+  }, 50);
+}
+function resetAcc() {
+  document.getElementById('accscore').textContent = '0%';
+  const bar = document.querySelector('.accfill');
+  bar.style.transition = 'none';
+  bar.style.width = '0';
+}
+
+/* Slide 8 — evaluation stats */
+function triggerEval() {
+  setTimeout(() => {
+    countUp(document.getElementById('stat-cases'), 0, 14,    1000, 0, '');
+    countUp(document.getElementById('stat-txns'),  0, 30,   1400, 0, '');
+    countUp(document.getElementById('stat-acc'),   0, 89, 1800, 2, '%');
+    document.querySelectorAll('.sbar-fill').forEach(b => { b.style.width = b.dataset.w + '%'; });
+  }, 400);
+}
+function resetEval() {
+  document.getElementById('stat-cases').textContent = '0';
+  document.getElementById('stat-txns').textContent  = '0';
+  document.getElementById('stat-acc').textContent   = '0%';
+  document.querySelectorAll('.sbar-fill').forEach(b => {
+    b.style.transition = 'none'; b.style.width = '0';
+    requestAnimationFrame(() => { b.style.transition = ''; });
+  });
+}
+
+function countUp(el, from, to, dur, dec, suffix) {
+  const t0 = performance.now();
+  function frame(t) {
+    const p = Math.min((t-t0)/dur, 1);
+    const e = 1 - Math.pow(1-p, 3);
+    el.textContent = (from + (to-from)*e).toFixed(dec) + suffix;
+    if (p < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+</script>
+</body>
+</html>

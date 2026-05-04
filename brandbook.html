@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brand Book — DECK 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Playfair+Display:ital,wght@1,900&display=swap" rel="stylesheet">
+
+    <style>
+        /* ─────────────────────────────────────────
+           TOKENS
+        ───────────────────────────────────────── */
+        :root {
+            --bg:       #090909;
+            --surface:  #0f0f0f;
+            --border:   #1e1e1e;
+            --ivory:    #F2EDE4;
+            --ivory-60: rgba(242,237,228,0.6);
+            --ivory-20: rgba(242,237,228,0.1);
+            --red:      #D63229;
+            --red-dim:  rgba(214,50,41,0.12);
+
+            --font-display: 'Bebas Neue', cursive;
+            --font-body:    'IBM Plex Mono', monospace;
+            --font-accent:  'Playfair Display', serif;
+
+            --sidebar-w: 220px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg);
+            color: var(--ivory);
+            font-family: var(--font-body);
+            line-height: 1.6;
+        }
+
+        /* Grain */
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+            opacity: 0.45;
+        }
+
+        /* ─────────────────────────────────────────
+           SIDEBAR
+        ───────────────────────────────────────── */
+        .sidebar {
+            position: fixed; left: 0; top: 0;
+            width: var(--sidebar-w); height: 100vh;
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column;
+            padding: 3rem 2rem;
+            z-index: 100;
+            background: var(--bg);
+        }
+
+        .sidebar-brand {
+            margin-bottom: 3rem;
+        }
+        .sidebar-brand .name {
+            font-family: var(--font-display);
+            font-size: 22px; letter-spacing: .2em;
+        }
+        .sidebar-brand .sub {
+            font-size: 9px; letter-spacing: .3em;
+            text-transform: uppercase; color: #333;
+            margin-top: 4px;
+        }
+        .sidebar-brand .dot {
+            display: inline-block; width: 5px; height: 5px;
+            border-radius: 50%; background: var(--red);
+            margin: 0 8px 1px;
+        }
+
+        .nav-list { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+
+        .nav-list a {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+            color: #333; text-decoration: none;
+            padding: 8px 0;
+            border-bottom: 1px solid transparent;
+            transition: color .2s ease, border-color .2s ease;
+        }
+        .nav-list a::before {
+            content: attr(data-num);
+            font-size: 9px; color: #282828;
+            transition: color .2s ease;
+        }
+        .nav-list a:hover,
+        .nav-list a.active {
+            color: var(--ivory);
+        }
+        .nav-list a.active::before { color: var(--red); }
+        .nav-list a:hover::before  { color: #444; }
+
+        .sidebar-footer {
+            margin-top: auto;
+            font-size: 9px; letter-spacing: .15em;
+            color: #252525; line-height: 1.9;
+        }
+
+        /* ─────────────────────────────────────────
+           MAIN CONTENT
+        ───────────────────────────────────────── */
+        .main {
+            margin-left: var(--sidebar-w);
+            padding: 0 6vw 10rem;
+        }
+
+        /* ─────────────────────────────────────────
+           HERO
+        ───────────────────────────────────────── */
+        .hero {
+            min-height: 100vh;
+            display: flex; flex-direction: column; justify-content: flex-end;
+            padding-bottom: 8rem;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bg-text {
+            position: absolute; right: -0.04em; bottom: -0.15em;
+            font-family: var(--font-display);
+            font-size: clamp(160px, 28vw, 380px);
+            line-height: 1; color: transparent;
+            -webkit-text-stroke: 1px var(--border);
+            user-select: none; pointer-events: none;
+        }
+
+        .hero-eyebrow {
+            font-size: 10px; letter-spacing: .3em; text-transform: uppercase;
+            color: var(--red); margin-bottom: 2rem;
+            display: flex; align-items: center; gap: 14px;
+        }
+        .hero-eyebrow::before { content:''; width:32px; height:1px; background:var(--red); }
+
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: clamp(72px, 12vw, 180px);
+            line-height: .88; letter-spacing: -.01em;
+            margin-bottom: 3rem;
+        }
+        .hero-title em {
+            font-family: var(--font-accent);
+            font-style: italic; color: var(--red);
+        }
+
+        .hero-desc {
+            font-size: 13px; line-height: 1.85; color: #666;
+            max-width: 50ch; font-weight: 300;
+            border-left: 2px solid var(--red); padding-left: 1.5rem;
+        }
+
+        /* ─────────────────────────────────────────
+           SECTION STRUCTURE
+        ───────────────────────────────────────── */
+        .section {
+            padding: 8rem 0 4rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .section:last-child { border-bottom: none; }
+
+        .section-header {
+            display: flex; align-items: baseline; gap: 2rem;
+            margin-bottom: 5rem;
+        }
+        .section-num {
+            font-size: 10px; letter-spacing: .3em;
+            text-transform: uppercase; color: var(--red);
+            flex-shrink: 0;
+        }
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(36px, 5vw, 68px);
+            letter-spacing: .02em; line-height: 1;
+        }
+        .section-divider {
+            flex: 1; height: 1px; background: var(--border);
+        }
+
+        /* ─────────────────────────────────────────
+           LABEL / TAG ATOMS
+        ───────────────────────────────────────── */
+        .label {
+            font-size: 9px; letter-spacing: .28em;
+            text-transform: uppercase; color: #333;
+            margin-bottom: 1rem;
+        }
+
+        /* ─────────────────────────────────────────
+           § COLORS
+        ───────────────────────────────────────── */
+        .colors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1px;
+            background: var(--border);
+        }
+
+        .color-card {
+            background: var(--bg);
+            overflow: hidden;
+        }
+        .color-swatch {
+            height: 140px;
+            position: relative;
+        }
+        .color-swatch::after {
+            content: attr(data-hex);
+            position: absolute; bottom: 1rem; left: 1.2rem;
+            font-size: 10px; letter-spacing: .12em;
+            font-family: var(--font-body);
+            mix-blend-mode: difference;
+            color: white;
+            opacity: .5;
+        }
+        .color-info { padding: 1.4rem 1.2rem 1.6rem; }
+        .color-name {
+            font-family: var(--font-display);
+            font-size: 20px; letter-spacing: .06em;
+            margin-bottom: .4rem;
+        }
+        .color-role { font-size: 10px; color: #444; line-height: 1.6; }
+        .color-token {
+            display: inline-block; margin-top: .8rem;
+            font-size: 9px; letter-spacing: .12em;
+            color: var(--red); background: var(--red-dim);
+            padding: 3px 8px;
+        }
+
+        /* ─────────────────────────────────────────
+           § TYPOGRAPHY
+        ───────────────────────────────────────── */
+        .type-specimen {
+            background: var(--border);
+            height: 1px; margin: 3.5rem 0;
+        }
+
+        .type-row {
+            display: grid;
+            grid-template-columns: 180px 1fr;
+            gap: 3rem; align-items: start;
+            padding: 3rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .type-row:last-child { border-bottom: none; }
+
+        .type-meta { padding-top: .3rem; }
+        .type-meta .font-name {
+            font-size: 11px; letter-spacing: .15em;
+            text-transform: uppercase; color: var(--ivory-60);
+            margin-bottom: .4rem;
+        }
+        .type-meta .font-detail {
+            font-size: 10px; color: #333; line-height: 1.8;
+        }
+        .type-meta .token {
+            display: inline-block; margin-top: .8rem;
+            font-size: 9px; letter-spacing: .12em;
+            color: var(--red); background: var(--red-dim);
+            padding: 3px 8px;
+        }
+
+        .type-sample { overflow: hidden; }
+
+        /* Display / Bebas Neue */
+        .sample-display {
+            font-family: var(--font-display);
+            font-size: clamp(56px, 8vw, 110px);
+            line-height: .9; letter-spacing: -.01em;
+            color: var(--ivory);
+        }
+
+        /* Accent / Playfair italic */
+        .sample-accent {
+            font-family: var(--font-accent);
+            font-style: italic;
+            font-size: clamp(44px, 6.5vw, 88px);
+            line-height: 1; color: var(--red);
+        }
+
+        /* Body / IBM Plex Mono */
+        .sample-body {
+            font-size: 14px; line-height: 1.9;
+            color: var(--ivory-60); font-weight: 300;
+            max-width: 60ch;
+        }
+
+        /* Scale table */
+        .type-scale {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 4rem;
+        }
+        .type-scale th, .type-scale td {
+            text-align: left;
+            padding: .9rem 1.2rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+        }
+        .type-scale th {
+            font-size: 9px; letter-spacing: .2em;
+            text-transform: uppercase; color: #333;
+            font-weight: 400;
+        }
+        .type-scale td:first-child { color: var(--red); }
+        .type-scale .preview-cell { font-family: var(--font-display); }
+
+        /* ─────────────────────────────────────────
+           § SPACING
+        ───────────────────────────────────────── */
+        .spacing-grid {
+            display: flex; flex-direction: column; gap: 1px;
+            background: var(--border); max-width: 700px;
+        }
+        .space-row {
+            background: var(--bg);
+            display: grid; grid-template-columns: 100px 1fr 80px;
+            align-items: center; gap: 2rem;
+            padding: 1rem 1.5rem;
+        }
+        .space-token { font-size: 10px; color: var(--red); letter-spacing: .1em; }
+        .space-bar-wrap { background: var(--surface); height: 10px; position: relative; }
+        .space-bar { height: 100%; background: var(--red); opacity: .7; }
+        .space-val { font-size: 10px; color: #444; text-align: right; }
+
+        /* ─────────────────────────────────────────
+           § COMPONENTS
+        ───────────────────────────────────────── */
+        .comp-grid {
+            display: grid; gap: 1px;
+            background: var(--border);
+        }
+        .comp-cell {
+            background: var(--bg);
+            padding: 3rem 2.5rem;
+        }
+        .comp-label {
+            font-size: 9px; letter-spacing: .25em;
+            text-transform: uppercase; color: #333;
+            margin-bottom: 2rem;
+        }
+
+        /* Tag component */
+        .c-tag {
+            font-size: 11px; letter-spacing: .25em;
+            text-transform: uppercase; color: var(--red);
+            display: inline-flex; align-items: center; gap: 14px;
+        }
+        .c-tag::before { content:''; width:32px; height:1px; background:var(--red); }
+
+        /* Section label */
+        .c-section-label {
+            font-size: 10px; letter-spacing: .28em;
+            text-transform: uppercase; color: #444;
+            display: inline-flex; align-items: center; gap: 14px;
+        }
+        .c-section-label::after { content:''; width:48px; height:1px; background:var(--border); }
+
+        /* Card */
+        .c-card {
+            background: var(--bg); border: 1px solid var(--border);
+            padding: 2rem 1.8rem; max-width: 240px;
+            position: relative; overflow: hidden;
+            transition: background .3s ease;
+            cursor: default;
+        }
+        .c-card::after {
+            content:''; position:absolute; bottom:0; left:0;
+            width:0; height:2px; background:var(--red);
+            transition:width .4s ease;
+        }
+        .c-card:hover { background: var(--surface); }
+        .c-card:hover::after { width:100%; }
+        .c-card-num  { font-size:10px; letter-spacing:.2em; color:var(--red); margin-bottom:1rem; }
+        .c-card-name { font-family:var(--font-display); font-size:24px; letter-spacing:.05em; margin-bottom:.8rem; }
+        .c-card-desc { font-size:11px; line-height:1.85; color:#555; font-weight:300; }
+
+        /* Buttons */
+        .c-btn-primary {
+            display: inline-flex; align-items: center; gap: 14px;
+            background: var(--red); color: var(--ivory);
+            font-family: var(--font-body);
+            font-size: 11px; letter-spacing: .18em;
+            text-transform: uppercase; padding: 16px 32px;
+            border: none; cursor: pointer;
+            position: relative; overflow: hidden;
+            transition: letter-spacing .25s ease;
+        }
+        .c-btn-primary::before {
+            content:''; position:absolute; inset:0;
+            background: rgba(255,255,255,.1);
+            transform: translateX(-101%);
+            transition: transform .3s ease;
+        }
+        .c-btn-primary:hover::before { transform: translateX(0); }
+        .c-btn-primary:hover { letter-spacing: .28em; }
+
+        .c-btn-ghost {
+            display: inline-flex; align-items: center; gap: 14px;
+            background: transparent; color: var(--ivory);
+            font-family: var(--font-body);
+            font-size: 11px; letter-spacing: .18em;
+            text-transform: uppercase; padding: 15px 31px;
+            border: 1px solid var(--border); cursor: pointer;
+            transition: border-color .2s ease, background .2s ease;
+        }
+        .c-btn-ghost:hover {
+            border-color: var(--ivory);
+            background: var(--ivory-20);
+        }
+
+        /* Nav buttons */
+        .c-nav-btn {
+            width:44px; height:44px;
+            border:1px solid var(--border); background:transparent;
+            color:var(--ivory); cursor:pointer;
+            display:inline-flex; align-items:center; justify-content:center;
+            transition: all .2s ease;
+        }
+        .c-nav-btn:hover { border-color:var(--ivory); background:var(--ivory-20); }
+
+        /* Dots */
+        .c-dots { display:inline-flex; gap:6px; align-items:center; }
+        .c-dot  { width:20px; height:2px; background:var(--border); cursor:pointer; transition:all .3s ease; }
+        .c-dot.on { background:var(--red); width:36px; }
+
+        /* Red line */
+        .c-redline-demo {
+            display: flex; gap: 2rem; align-items: stretch;
+        }
+        .c-redline {
+            width: 3px; background: var(--red); flex-shrink: 0;
+        }
+        .c-redline-content {
+            font-size: 12px; color: #666; line-height: 1.8; font-weight:300;
+        }
+
+        /* Subtitle block */
+        .c-subtitle {
+            font-size: 13px; line-height: 1.8; color: #777;
+            border-left: 2px solid var(--red); padding-left: 1.4rem;
+            max-width: 44ch; font-weight:300;
+        }
+
+        /* ─────────────────────────────────────────
+           § MOTION
+        ───────────────────────────────────────── */
+        .motion-rows { display:flex; flex-direction:column; gap:1px; background:var(--border); }
+        .motion-row  {
+            background:var(--bg);
+            display:grid; grid-template-columns:160px 1fr 120px;
+            align-items:center; gap:2rem; padding:1.4rem 1.8rem;
+        }
+        .motion-name  { font-size:10px; letter-spacing:.12em; color:var(--ivory-60); }
+        .motion-curve { font-size:10px; color:var(--red); }
+        .motion-val   { font-size:10px; color:#444; text-align:right; }
+
+        .motion-demo-grid {
+            display:grid; grid-template-columns:repeat(3,1fr);
+            gap:1px; background:var(--border); margin-top:3rem;
+        }
+        .motion-demo-cell {
+            background:var(--bg); padding:2.5rem 2rem;
+            display:flex; flex-direction:column; align-items:flex-start; gap:1.5rem;
+        }
+        .motion-demo-label { font-size:9px; letter-spacing:.22em; text-transform:uppercase; color:#333; }
+        .motion-target {
+            width:40px; height:40px; background:var(--red);
+            position:relative;
+        }
+        .motion-target.fade-demo   { animation: demoFade   2.4s cubic-bezier(0.16,1,0.3,1) infinite alternate; }
+        .motion-target.slide-demo  { animation: demoSlide  2.4s cubic-bezier(0.16,1,0.3,1) infinite alternate; }
+        .motion-target.scale-demo  { animation: demoScale  2.4s cubic-bezier(0.16,1,0.3,1) infinite alternate; }
+
+        @keyframes demoFade  { from{opacity:.1} to{opacity:1} }
+        @keyframes demoSlide { from{transform:translateX(0)} to{transform:translateX(60px)} }
+        @keyframes demoScale { from{transform:scale(.5)} to{transform:scale(1)} }
+
+        /* ─────────────────────────────────────────
+           § PRINCIPLES
+        ───────────────────────────────────────── */
+        .principles-grid {
+            display:grid; grid-template-columns:repeat(3,1fr);
+            gap:1px; background:var(--border);
+        }
+        .principle-card {
+            background:var(--bg); padding:3rem 2.5rem;
+            position:relative;
+        }
+        .principle-card::before {
+            content:''; display:block;
+            width:2px; height:32px; background:var(--red);
+            margin-bottom:2rem;
+        }
+        .principle-num   { font-size:10px; letter-spacing:.25em; color:var(--red); margin-bottom:1.2rem; }
+        .principle-title {
+            font-family:var(--font-display); font-size:30px;
+            letter-spacing:.04em; margin-bottom:1.2rem;
+        }
+        .principle-body  { font-size:12px; line-height:1.9; color:#555; font-weight:300; }
+
+        /* ─────────────────────────────────────────
+           SCROLL SPY
+        ───────────────────────────────────────── */
+        /* handled by JS */
+
+        /* ─────────────────────────────────────────
+           RESPONSIVE
+        ───────────────────────────────────────── */
+        @media (max-width: 900px) {
+            :root { --sidebar-w: 0px; }
+            .sidebar { display:none; }
+            .main { padding: 0 1.8rem 6rem; }
+            .type-row { grid-template-columns:1fr; gap:1.5rem; }
+            .principles-grid,
+            .motion-demo-grid { grid-template-columns:1fr; }
+            .motion-row { grid-template-columns:1fr 1fr; }
+            .motion-val { display:none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ─── SIDEBAR ─── -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="name">DECK<span class="dot"></span></div>
+            <div class="sub">Brand Guidelines · 2026</div>
+        </div>
+
+        <ul class="nav-list">
+            <li><a href="#colors"     data-num="01">Colors</a></li>
+            <li><a href="#typography" data-num="02">Typography</a></li>
+            <li><a href="#spacing"    data-num="03">Spacing</a></li>
+            <li><a href="#components" data-num="04">Components</a></li>
+            <li><a href="#motion"     data-num="05">Motion</a></li>
+            <li><a href="#principles" data-num="06">Principles</a></li>
+        </ul>
+
+        <div class="sidebar-footer">
+            Version 1.0.0<br>
+            Last updated · May 2026<br>
+            Internal use only
+        </div>
+    </aside>
+
+    <!-- ─── MAIN ─── -->
+    <main class="main">
+
+        <!-- HERO -->
+        <section class="hero">
+            <div class="hero-eyebrow">Brand Identity System</div>
+            <h1 class="hero-title">
+                Design<br>
+                With <em>Intent</em>
+            </h1>
+            <p class="hero-desc">
+                This document defines the visual language of DECK — our typographic hierarchy, color philosophy, component library, and motion principles. Every decision here exists for a reason.
+            </p>
+            <div class="hero-bg-text">BB</div>
+        </section>
+
+        <!-- ─── 01 COLORS ─── -->
+        <section class="section" id="colors">
+            <div class="section-header">
+                <span class="section-num">01</span>
+                <h2 class="section-title">Colors</h2>
+                <div class="section-divider"></div>
+            </div>
+
+            <p style="font-size:12px;color:#555;max-width:55ch;line-height:1.9;margin-bottom:3.5rem;">
+                The palette is intentionally minimal. One deep background, one warm text tone, one red that carries all the visual heat. Restraint is the system.
+            </p>
+
+            <div class="colors-grid">
+
+                <div class="color-card">
+                    <div class="color-swatch" style="background:#090909;" data-hex="#090909"></div>
+                    <div class="color-info">
+                        <div class="color-name">Void</div>
+                        <div class="color-role">Page background. The foundation everything sits on. Near-black, not pure black — keeps depth without harshness.</div>
+                        <span class="color-token">--bg</span>
+                    </div>
+                </div>
+
+                <div class="color-card">
+                    <div class="color-swatch" style="background:#0f0f0f;" data-hex="#0f0f0f"></div>
+                    <div class="color-info">
+                        <div class="color-name">Surface</div>
+                        <div class="color-role">Hover state, elevated cards. Barely perceptible lift from background — used sparingly for depth.</div>
+                        <span class="color-token">--surface</span>
+                    </div>
+                </div>
+
+                <div class="color-card">
+                    <div class="color-swatch" style="background:#1e1e1e;" data-hex="#1e1e1e"></div>
+                    <div class="color-info">
+                        <div class="color-name">Border</div>
+                        <div class="color-role">Dividers, grid gaps, structural lines. The quiet skeleton that holds layout together.</div>
+                        <span class="color-token">--border</span>
+                    </div>
+                </div>
+
+                <div class="color-card">
+                    <div class="color-swatch" style="background:#F2EDE4;" data-hex="#F2EDE4"></div>
+                    <div class="color-info">
+                        <div class="color-name">Ivory</div>
+                        <div class="color-role">Primary text. Warm off-white — softer than pure white, avoids the harshness of stark contrast. All headlines and body copy.</div>
+                        <span class="color-token">--ivory</span>
+                    </div>
+                </div>
+
+                <div class="color-card">
+                    <div class="color-swatch" style="background:#D63229;" data-hex="#D63229"></div>
+                    <div class="color-info">
+                        <div class="color-name">Vermillion</div>
+                        <div class="color-role">The only accent. Used for tags, line decorations, numbers, interactive underlines, and CTA buttons. Never diluted.</div>
+                        <span class="color-token">--red</span>
+                    </div>
+                </div>
+
+                <div class="color-card">
+                    <div class="color-swatch" style="background:rgba(214,50,41,0.12);" data-hex="rgba red 12%"></div>
+                    <div class="color-info">
+                        <div class="color-name">Vermillion Dim</div>
+                        <div class="color-role">Background tint for code tokens, badges, and pill labels. Low-opacity to suggest accent without competing.</div>
+                        <span class="color-token">--red-dim</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Usage rules -->
+            <div style="margin-top:3.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);max-width:700px;">
+                <div style="background:var(--bg);padding:2rem;">
+                    <div class="label">Do</div>
+                    <ul style="font-size:11px;color:#555;line-height:2;list-style:none;padding:0;">
+                        <li style="padding-left:1.2rem;border-left:2px solid var(--red);">Use red only for single points of emphasis</li>
+                        <li style="padding-left:1.2rem;border-left:2px solid var(--border);margin-top:6px;">Keep text on --bg or --surface only</li>
+                        <li style="padding-left:1.2rem;border-left:2px solid var(--border);margin-top:6px;">Use --ivory-60 for secondary text</li>
+                    </ul>
+                </div>
+                <div style="background:var(--bg);padding:2rem;">
+                    <div class="label">Don't</div>
+                    <ul style="font-size:11px;color:#555;line-height:2;list-style:none;padding:0;">
+                        <li style="padding-left:1.2rem;border-left:2px solid #2a2a2a;">Add new accent colors to the system</li>
+                        <li style="padding-left:1.2rem;border-left:2px solid #2a2a2a;margin-top:6px;">Use pure #FFFFFF or #000000</li>
+                        <li style="padding-left:1.2rem;border-left:2px solid #2a2a2a;margin-top:6px;">Use red for decorative purposes only</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── 02 TYPOGRAPHY ─── -->
+        <section class="section" id="typography">
+            <div class="section-header">
+                <span class="section-num">02</span>
+                <h2 class="section-title">Typography</h2>
+                <div class="section-divider"></div>
+            </div>
+
+            <p style="font-size:12px;color:#555;max-width:55ch;line-height:1.9;margin-bottom:4rem;">
+                Three typefaces. Each with a precise role. No substitutions, no system fonts, no Inter.
+            </p>
+
+            <!-- Font 1: Bebas Neue -->
+            <div class="type-row">
+                <div class="type-meta">
+                    <div class="font-name">Bebas Neue</div>
+                    <div class="font-detail">
+                        Weight: 400 (Regular)<br>
+                        Role: Headlines, slide numbers, all display use<br>
+                        Tracking: −0.01em to +0.2em<br>
+                        Source: Google Fonts
+                    </div>
+                    <span class="token">--font-display</span>
+                </div>
+                <div class="type-sample">
+                    <div class="sample-display">ABCDEFG<br>HIJKLMN</div>
+                    <div style="margin-top:1.5rem;font-family:var(--font-display);font-size:22px;letter-spacing:.06em;color:#444;">
+                        0 1 2 3 4 5 6 7 8 9
+                    </div>
+                </div>
+            </div>
+
+            <!-- Font 2: Playfair Display Italic -->
+            <div class="type-row">
+                <div class="type-meta">
+                    <div class="font-name">Playfair Display</div>
+                    <div class="font-detail">
+                        Weight: 900 Italic only<br>
+                        Role: Accent words inside headlines — the single warm note in a cold composition<br>
+                        Source: Google Fonts
+                    </div>
+                    <span class="token">--font-accent</span>
+                </div>
+                <div class="type-sample">
+                    <div class="sample-accent">Intent<br>Motion<br><span style="color:var(--ivory);">People</span></div>
+                </div>
+            </div>
+
+            <!-- Font 3: IBM Plex Mono -->
+            <div class="type-row" style="border-bottom:none;">
+                <div class="type-meta">
+                    <div class="font-name">IBM Plex Mono</div>
+                    <div class="font-detail">
+                        Weights: 300, 400, 500<br>
+                        Italic: 300i (used for captions)<br>
+                        Role: All body text, labels, captions, UI elements, tokens<br>
+                        Source: Google Fonts
+                    </div>
+                    <span class="token">--font-body</span>
+                </div>
+                <div class="type-sample">
+                    <div class="sample-body">
+                        Every decision in this system was made deliberately. The monospaced font carries a sense of precision — a signal that the words have been chosen as carefully as the code.
+                    </div>
+                    <div style="margin-top:1.5rem;font-size:12px;line-height:2;color:#333;">
+                        Light 300 · Regular 400 · Medium 500<br>
+                        ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>
+                        abcdefghijklmnopqrstuvwxyz · 0123456789
+                    </div>
+                </div>
+            </div>
+
+            <!-- Type scale table -->
+            <table class="type-scale">
+                <thead>
+                    <tr>
+                        <th>Role</th>
+                        <th>Font</th>
+                        <th>Size</th>
+                        <th>Weight</th>
+                        <th>Tracking</th>
+                        <th>Preview</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Hero Headline</td>
+                        <td>Bebas Neue</td>
+                        <td>clamp(72px, 12vw, 180px)</td>
+                        <td>400</td>
+                        <td>−0.01em</td>
+                        <td class="preview-cell" style="font-size:28px;">HEADLINE</td>
+                    </tr>
+                    <tr>
+                        <td>Section Title</td>
+                        <td>Bebas Neue</td>
+                        <td>clamp(36px, 5vw, 68px)</td>
+                        <td>400</td>
+                        <td>+0.02em</td>
+                        <td class="preview-cell" style="font-size:22px;">SECTION</td>
+                    </tr>
+                    <tr>
+                        <td>Card Title</td>
+                        <td>Bebas Neue</td>
+                        <td>24–28px</td>
+                        <td>400</td>
+                        <td>+0.05em</td>
+                        <td class="preview-cell" style="font-size:18px;">CARD TITLE</td>
+                    </tr>
+                    <tr>
+                        <td>Accent Word</td>
+                        <td>Playfair Display</td>
+                        <td>Match parent headline</td>
+                        <td>900i</td>
+                        <td>default</td>
+                        <td class="preview-cell" style="font-family:var(--font-accent);font-style:italic;font-size:22px;color:var(--red);">Accent</td>
+                    </tr>
+                    <tr>
+                        <td>Body</td>
+                        <td>IBM Plex Mono</td>
+                        <td>12–15px</td>
+                        <td>300</td>
+                        <td>default</td>
+                        <td style="font-size:12px;color:#666;">Body text copy</td>
+                    </tr>
+                    <tr>
+                        <td>Label / Tag</td>
+                        <td>IBM Plex Mono</td>
+                        <td>9–11px</td>
+                        <td>400</td>
+                        <td>+0.25–0.30em</td>
+                        <td style="font-size:10px;letter-spacing:.25em;color:var(--red);text-transform:uppercase;">LABEL</td>
+                    </tr>
+                    <tr>
+                        <td>Caption / Footer</td>
+                        <td>IBM Plex Mono</td>
+                        <td>9–10px</td>
+                        <td>400</td>
+                        <td>+0.15em</td>
+                        <td style="font-size:10px;color:#333;">Caption text</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- ─── 03 SPACING ─── -->
+        <section class="section" id="spacing">
+            <div class="section-header">
+                <span class="section-num">03</span>
+                <h2 class="section-title">Spacing</h2>
+                <div class="section-divider"></div>
+            </div>
+
+            <p style="font-size:12px;color:#555;max-width:55ch;line-height:1.9;margin-bottom:3.5rem;">
+                Spacing is generous and rhythmic. Values multiply from a 4px base. Sections breathe — dense components use tighter increments.
+            </p>
+
+            <div class="spacing-grid">
+                <div class="space-row">
+                    <div class="space-token">--space-xs</div>
+                    <div class="space-bar-wrap"><div class="space-bar" style="width:2%"></div></div>
+                    <div class="space-val">4px</div>
+                </div>
+                <div class="space-row">
+                    <div class="space-token">--space-sm</div>
+                    <div class="space-bar-wrap"><div class="space-bar" style="width:4%"></div></div>
+                    <div class="space-val">8px</div>
+                </div>
+                <div class="space-row">
+                    <div class="space-token">--space-md</div>
+                    <div class="space-bar-wrap"><div class="space-bar" style="width:8%"></div></div>
+                    <div class="space-val">16px</div>
+                </div>
+                <div class="space-row">
+                    <div class="space-token">--space-lg</div>
+                    <div class="space-bar-wrap"><div class="space-bar" style="width:16%"></div></div>
+                    <div class="space-val">32px</div>
+                </div>
+                <div class="space-row">
+                    <div class="space-token">--space-xl</div>
+                    <div class="space-bar-wrap"><div class="space-bar" style="width:28%"></div></div>
+                    <div class="space-val">56px</div>
+                </div>
+                <div class="space-row">
+                    <div class="space-token">--space-2xl</div>
+                    <div class="space-bar-wrap"><div class="space-bar" style="width:48%"></div></div>
+                    <div class="space-val">96px</div>
+                </div>
+                <div class="space-row">
+                    <div class="space-token">--space-3xl</div>
+                    <div class="space-bar-wrap"><div class="space-bar" style="width:100%"></div></div>
+                    <div class="space-val">128px</div>
+                </div>
+            </div>
+
+            <div style="margin-top:3rem;font-size:11px;color:#444;line-height:2;border-left:2px solid var(--border);padding-left:1.4rem;max-width:50ch;">
+                Section padding: 8vw horizontal · 8rem vertical top<br>
+                Card internal padding: 2–2.5rem<br>
+                Border gaps (grid): always 1px via background trick<br>
+                Line heights: 0.88 (display) · 1.6 (labels) · 1.85–1.9 (body)
+            </div>
+        </section>
+
+        <!-- ─── 04 COMPONENTS ─── -->
+        <section class="section" id="components">
+            <div class="section-header">
+                <span class="section-num">04</span>
+                <h2 class="section-title">Components</h2>
+                <div class="section-divider"></div>
+            </div>
+
+            <div class="comp-grid" style="grid-template-columns:1fr 1fr;">
+
+                <!-- Tags & Labels -->
+                <div class="comp-cell">
+                    <div class="comp-label">Tag / Eyebrow</div>
+                    <div class="c-tag">Presentation · 2026</div>
+                    <div style="margin-top:2rem;font-size:10px;color:#333;line-height:1.9;">
+                        Always uppercase · letter-spacing .25em<br>
+                        Red color · preceded by a 32px red rule<br>
+                        Used to open sections and slides
+                    </div>
+                </div>
+
+                <div class="comp-cell">
+                    <div class="comp-label">Section Label</div>
+                    <div class="c-section-label">Core Principles</div>
+                    <div style="margin-top:2rem;font-size:10px;color:#333;line-height:1.9;">
+                        Dark muted color · followed by 48px rule<br>
+                        Smaller than Tag · used as column headers<br>
+                        and content section openers
+                    </div>
+                </div>
+
+                <!-- Card -->
+                <div class="comp-cell">
+                    <div class="comp-label">Feature Card</div>
+                    <div class="c-card">
+                        <div class="c-card-num">— 01</div>
+                        <div class="c-card-name">Intention</div>
+                        <p class="c-card-desc">Every pixel placed with purpose. No element without earning its space.</p>
+                    </div>
+                    <div style="margin-top:1.5rem;font-size:10px;color:#333;line-height:1.9;">
+                        1px border via grid gap trick · hover lifts background<br>
+                        Red underline sweeps in on hover<br>
+                        Number prefix always uses — dash + 2-digit
+                    </div>
+                </div>
+
+                <!-- Subtitle block -->
+                <div class="comp-cell">
+                    <div class="comp-label">Subtitle / Bordered Text</div>
+                    <div class="c-subtitle">
+                        A curated exploration of intentional design decisions, visual craft, and the spaces where form meets meaning.
+                    </div>
+                    <div style="margin-top:1.5rem;font-size:10px;color:#333;line-height:1.9;">
+                        2px red left border · IBM Plex Mono 300<br>
+                        Used directly under hero headlines<br>
+                        Max-width ~44ch for readability
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="comp-cell">
+                    <div class="comp-label">Primary Button</div>
+                    <button class="c-btn-primary">
+                        Start the Conversation
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                            <path d="M3 8H13M9 4L13 8L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div style="margin-top:1.5rem;font-size:10px;color:#333;line-height:1.9;">
+                        Solid --red background · white sweep on hover<br>
+                        Letter-spacing widens on hover (.18 → .28em)<br>
+                        Always paired with directional arrow SVG
+                    </div>
+                </div>
+
+                <div class="comp-cell">
+                    <div class="comp-label">Ghost Button + Nav</div>
+                    <div style="display:flex;flex-direction:column;gap:1.5rem;align-items:flex-start;">
+                        <button class="c-btn-ghost">Secondary Action</button>
+                        <div style="display:flex;gap:.8rem;align-items:center;">
+                            <button class="c-nav-btn">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                    <path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <button class="c-nav-btn">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                    <path d="M5 2L10 7L5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <div class="c-dots">
+                                <div class="c-dot on"></div>
+                                <div class="c-dot"></div>
+                                <div class="c-dot"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top:1.5rem;font-size:10px;color:#333;line-height:1.9;">
+                        Ghost border fades to --ivory on hover<br>
+                        Nav buttons 44×44px · same border treatment<br>
+                        Progress dots: 20px inactive / 36px active
+                    </div>
+                </div>
+
+                <!-- Red line -->
+                <div class="comp-cell" style="grid-column:1/-1;">
+                    <div class="comp-label">Vertical Red Line (Slide Accent)</div>
+                    <div class="c-redline-demo" style="height:80px;">
+                        <div class="c-redline"></div>
+                        <div class="c-redline-content">
+                            A 3px vermillion line fixed to the left edge of each slide. It animates from height 0 to 100% on slide entry over 0.9s with a 0.25s delay — the first motion the eye sees on every new slide.
+                        </div>
+                    </div>
+                    <div style="margin-top:1.5rem;font-size:10px;color:#333;line-height:1.9;">
+                        width: 3px · position: absolute left 0, top 0<br>
+                        Transition: height 0.9s cubic-bezier(0.16,1,0.3,1) 0.25s<br>
+                        Also used as 2px left-border on text blocks
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ─── 05 MOTION ─── -->
+        <section class="section" id="motion">
+            <div class="section-header">
+                <span class="section-num">05</span>
+                <h2 class="section-title">Motion</h2>
+                <div class="section-divider"></div>
+            </div>
+
+            <p style="font-size:12px;color:#555;max-width:55ch;line-height:1.9;margin-bottom:3.5rem;">
+                All motion uses a single easing curve. Fast in, slow out. Nothing bounces. Nothing lingers.
+            </p>
+
+            <div class="motion-rows">
+                <div class="motion-row" style="background:var(--surface);">
+                    <div class="motion-name" style="color:var(--ivory);">System Easing</div>
+                    <div class="motion-curve">cubic-bezier(0.16, 1, 0.3, 1)</div>
+                    <div class="motion-val">Spring-like exit</div>
+                </div>
+                <div class="motion-row">
+                    <div class="motion-name">Slide Enter</div>
+                    <div class="motion-curve">opacity + translateX(60px → 0)</div>
+                    <div class="motion-val">0.55s</div>
+                </div>
+                <div class="motion-row">
+                    <div class="motion-name">Slide Exit</div>
+                    <div class="motion-curve">opacity + translateX(0 → −60px)</div>
+                    <div class="motion-val">0.35s ease</div>
+                </div>
+                <div class="motion-row">
+                    <div class="motion-name">Red Line</div>
+                    <div class="motion-curve">height 0 → 100%</div>
+                    <div class="motion-val">0.9s + 0.25s delay</div>
+                </div>
+                <div class="motion-row">
+                    <div class="motion-name">Content Stagger</div>
+                    <div class="motion-curve">translateY(22px → 0) + opacity</div>
+                    <div class="motion-val">0.6s · 4 steps</div>
+                </div>
+                <div class="motion-row">
+                    <div class="motion-name">Stagger Delays</div>
+                    <div class="motion-curve">s1: 0.08s · s2: 0.18s · s3: 0.30s · s4: 0.44s</div>
+                    <div class="motion-val">4 levels</div>
+                </div>
+                <div class="motion-row">
+                    <div class="motion-name">Card Underline</div>
+                    <div class="motion-curve">width 0 → 100% on hover</div>
+                    <div class="motion-val">0.4s ease</div>
+                </div>
+                <div class="motion-row">
+                    <div class="motion-name">Button Sweep</div>
+                    <div class="motion-curve">translateX(−101% → 0) overlay</div>
+                    <div class="motion-val">0.3s ease</div>
+                </div>
+            </div>
+
+            <div class="motion-demo-grid">
+                <div class="motion-demo-cell">
+                    <div class="motion-demo-label">Fade</div>
+                    <div class="motion-target fade-demo"></div>
+                    <div style="font-size:10px;color:#333;">opacity 0 → 1</div>
+                </div>
+                <div class="motion-demo-cell">
+                    <div class="motion-demo-label">Translate</div>
+                    <div class="motion-target slide-demo"></div>
+                    <div style="font-size:10px;color:#333;">translateX 0 → 60px</div>
+                </div>
+                <div class="motion-demo-cell">
+                    <div class="motion-demo-label">Scale</div>
+                    <div class="motion-target scale-demo"></div>
+                    <div style="font-size:10px;color:#333;">scale 0.5 → 1</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ─── 06 PRINCIPLES ─── -->
+        <section class="section" id="principles">
+            <div class="section-header">
+                <span class="section-num">06</span>
+                <h2 class="section-title">Principles</h2>
+                <div class="section-divider"></div>
+            </div>
+
+            <p style="font-size:12px;color:#555;max-width:55ch;line-height:1.9;margin-bottom:3.5rem;">
+                The rules behind the rules. These are the non-negotiable beliefs that anchor every visual decision in this system.
+            </p>
+
+            <div class="principles-grid">
+                <div class="principle-card">
+                    <div class="principle-num">— 01</div>
+                    <div class="principle-title">One Accent</div>
+                    <p class="principle-body">Vermillion red is the only color with expressive weight. If everything is accented, nothing is. Use it once per composition — where the eye should land first.</p>
+                </div>
+                <div class="principle-card">
+                    <div class="principle-num">— 02</div>
+                    <div class="principle-title">Earn Space</div>
+                    <p class="principle-body">Empty space is not wasted space. Each element must justify its presence. Before adding anything, ask: does removing this make the design better? Often the answer is yes.</p>
+                </div>
+                <div class="principle-card">
+                    <div class="principle-num">— 03</div>
+                    <div class="principle-title">No Noise</div>
+                    <p class="principle-body">Decorative elements serve structure. The grain texture, ghost numbers, and red line all carry spatial or navigational meaning. Decoration without function is forbidden.</p>
+                </div>
+                <div class="principle-card">
+                    <div class="principle-num">— 04</div>
+                    <div class="principle-title">Type Is Layout</div>
+                    <p class="principle-body">Headlines are shapes before they are words. At display size, Bebas Neue creates mass and rhythm. Design the type first; everything else is annotation.</p>
+                </div>
+                <div class="principle-card">
+                    <div class="principle-num">— 05</div>
+                    <div class="principle-title">Motion Is Signal</div>
+                    <p class="principle-body">Animation communicates sequence and hierarchy, not delight. The red line ascending on slide entry tells you: something new has started. Stagger tells you: read in this order.</p>
+                </div>
+                <div class="principle-card">
+                    <div class="principle-num">— 06</div>
+                    <div class="principle-title">Contrast Is Clarity</div>
+                    <p class="principle-body">The near-black background and warm ivory type create contrast that guides attention effortlessly. Never soften this contrast to seem sophisticated. Clarity is sophistication.</p>
+                </div>
+            </div>
+
+            <!-- Closing line -->
+            <div style="margin-top:6rem;padding-top:4rem;border-top:1px solid var(--border);">
+                <div style="font-family:var(--font-display);font-size:clamp(32px,4vw,52px);letter-spacing:.02em;margin-bottom:1.5rem;">
+                    The System Is the Message
+                </div>
+                <p style="font-size:12px;color:#444;line-height:1.9;max-width:55ch;border-left:2px solid var(--border);padding-left:1.4rem;">
+                    A brand guide that looks different from the brand it describes has failed. Every page, font choice, and motion curve in this document uses the exact same tokens as the presentation it governs.
+                </p>
+                <div style="margin-top:3rem;font-size:9px;letter-spacing:.2em;color:#222;text-transform:uppercase;">
+                    DECK Brand Book · v1.0.0 · May 2026
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Scroll spy
+        const sections = document.querySelectorAll('.section[id]');
+        const navLinks  = document.querySelectorAll('.nav-list a');
+
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.id;
+                    navLinks.forEach(a => {
+                        a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+                    });
+                }
+            });
+        }, { threshold: 0.3 });
+
+        sections.forEach(s => observer.observe(s));
+    </script>
+</body>
+</html>

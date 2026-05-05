@@ -1581,7 +1581,7 @@ function resetAcc() {
 function triggerEval() {
   setTimeout(() => {
     countUp(document.getElementById('stat-cases'), 0, 14,    1000, 0, '');
-    countUp(document.getElementById('stat-txns'),  0, 30,   1400, 0, '');
+    countUp(document.getElementById('stat-txns'),  0, 50,   1400, 0, '');
     countUp(document.getElementById('stat-acc'),   0, 89, 1800, 2, '%');
     document.querySelectorAll('.sbar-fill').forEach(b => { b.style.width = b.dataset.w + '%'; });
   }, 400);
